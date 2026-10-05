@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.BuildConfig
 import com.example.data.FavoritePlace
 import com.example.model.LocationPoint
 import com.example.model.MapStyle
@@ -88,10 +89,12 @@ fun ArrivaMapView(
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            // Set friendly Chrome mobile User-Agent for map tiles
+            settings.userAgentString = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36"
 
             webChromeClient = object : WebChromeClient() {
                 override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                    android.util.Log.d("ArrivaMap", "JS Console: ${consoleMessage?.message()}")
+                    android.util.Log.d("ArrivaMap", "JS: ${consoleMessage?.message()} (${consoleMessage?.sourceId()}:${consoleMessage?.lineNumber()})")
                     return true
                 }
             }
@@ -109,7 +112,8 @@ fun ArrivaMapView(
             }
 
             addJavascriptInterface(MapJsBridge(bridgeListener), "Android")
-            loadDataWithBaseURL("https://maps.google.com/", generateMapHtml(mapStyle.id), "text/html", "UTF-8", null)
+            // Use baseUrl = "https://localhost/" to avoid Google domain CSP restrictions on CDN scripts
+            loadDataWithBaseURL("https://localhost/", generateMapHtml(mapStyle.id, BuildConfig.MAPS_API_KEY), "text/html", "UTF-8", null)
         }
     }
 
@@ -183,22 +187,25 @@ fun ArrivaMapView(
     )
 }
 
-private fun generateMapHtml(initialStyle: String): String {
+private fun generateMapHtml(initialStyle: String, mapsApiKey: String): String {
     return """
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <title>Google Maps</title>
+    <!-- Leaflet with Multiple CDN redundancy and fallback -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #e5e3df;
+            background: #e8ecf1;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         #map {
             position: absolute;
@@ -209,11 +216,11 @@ private fun generateMapHtml(initialStyle: String): String {
             width: 100%;
             height: 100%;
             z-index: 1;
-            background: #e5e3df;
+            background: #e8ecf1;
         }
         .leaflet-control-attribution, .leaflet-control-zoom { display:none !important; }
         
-        /* Google Maps Accurate Pulse Marker */
+        /* User Radar Blue Marker */
         .user-pulse-container {
             position: relative;
             width: 48px;
@@ -228,7 +235,7 @@ private fun generateMapHtml(initialStyle: String): String {
             background: #1a73e8;
             border: 3px solid #ffffff;
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(26, 115, 232, 0.7);
+            box-shadow: 0 0 12px rgba(26, 115, 232, 0.8);
             z-index: 2;
         }
         .user-radar-ring {
@@ -236,7 +243,7 @@ private fun generateMapHtml(initialStyle: String): String {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(26, 115, 232, 0.25);
+            background: rgba(26, 115, 232, 0.28);
             animation: radarPulse 2s infinite ease-out;
             z-index: 1;
         }
@@ -245,7 +252,7 @@ private fun generateMapHtml(initialStyle: String): String {
             100% { transform: scale(1.6); opacity: 0; }
         }
 
-        /* Google Maps Bouncing Red Destination Pin */
+        /* Destination Red Pin */
         .dest-pin-container {
             width: 44px;
             height: 52px;
@@ -254,14 +261,14 @@ private fun generateMapHtml(initialStyle: String): String {
             align-items: center;
             animation: bouncePin 2s infinite ease-in-out;
             transform-origin: bottom center;
-            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
         }
         @keyframes bouncePin {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-7px); }
         }
 
-        /* Frutiger Aero Interactive Favorite Stop Pin */
+        /* Saved Favorite Gold Star Pin */
         .fav-pin-pulse {
             position: relative;
             width: 38px;
@@ -274,7 +281,7 @@ private fun generateMapHtml(initialStyle: String): String {
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .fav-pin-pulse:hover, .fav-pin-pulse:active {
-            transform: scale(1.18) translateY(-4px);
+            transform: scale(1.2) translateY(-4px);
         }
         .fav-pin-star-bubble {
             width: 32px;
@@ -298,7 +305,7 @@ private fun generateMapHtml(initialStyle: String): String {
             margin-top: -2px;
         }
 
-        /* Frutiger Aero Custom Leaflet Callout Popup */
+        /* Frutiger Aero Callout Popup */
         .leaflet-popup-content-wrapper {
             background: rgba(255, 255, 255, 0.96) !important;
             backdrop-filter: blur(12px) !important;
@@ -362,231 +369,248 @@ private fun generateMapHtml(initialStyle: String): String {
 <body>
     <div id="map"></div>
     <script>
-        var map = L.map('map', {
-            center: [36.7538, 3.0588],
-            zoom: 14,
-            zoomControl: false,
-            attributionControl: false
-        });
+        var map = null;
 
-        // Google Maps & Fallback Tiles
-        var tileLayers = {
-            google: L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }),
-            satellite: L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }),
-            terrain: L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }),
-            osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            }),
-            dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            })
-        };
-
-        var currentStyleKey = '$initialStyle' || 'google';
-        var currentLayer = tileLayers[currentStyleKey] || tileLayers.google;
-        currentLayer.addTo(map);
-
-        var fallbackOsm = tileLayers.osm;
-        tileLayers.google.on('tileerror', function() {
-            if (!map.hasLayer(fallbackOsm)) {
-                fallbackOsm.addTo(map);
-            }
-        });
-
-        window.setTileLayer = function(styleId) {
-            if (currentLayer) map.removeLayer(currentLayer);
-            if (map.hasLayer(fallbackOsm)) map.removeLayer(fallbackOsm);
-            currentLayer = tileLayers[styleId] || tileLayers.google;
-            currentLayer.addTo(map);
-        };
-
-        // User Marker
-        var userIcon = L.divIcon({
-            className: 'user-icon-leaflet',
-            html: '<div class="user-pulse-container"><div class="user-radar-ring"></div><div class="user-center-dot"></div></div>',
-            iconSize: [48, 48],
-            iconAnchor: [24, 24]
-        });
-        var userMarker = null;
-
-        window.updateUser = function(lat, lng, accuracy) {
-            if (!userMarker) {
-                userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
-                map.setView([lat, lng], 15);
-            } else {
-                userMarker.setLatLng([lat, lng]);
-            }
-            updateRoute();
-        };
-
-        // Destination Marker
-        var destPinSvg = '<svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<path d="M20 0C8.954 0 0 8.954 0 20C0 35 20 48 20 48C20 48 40 35 40 20C40 8.954 31.046 0 20 0Z" fill="#EA4335"/>' +
-            '<circle cx="20" cy="18" r="8" fill="white"/>' +
-            '<circle cx="20" cy="18" r="4" fill="#B31412"/>' +
-            '</svg>';
-
-        var destIcon = L.divIcon({
-            className: 'dest-icon-leaflet',
-            html: '<div class="dest-pin-container">' + destPinSvg + '</div>',
-            iconSize: [40, 48],
-            iconAnchor: [20, 46]
-        });
-
-        var destMarker = null;
-        var geofenceCircle = null;
-        var routePolyline = null;
-
-        window.setDestination = function(lat, lng, name, radius) {
-            if (!destMarker) {
-                destMarker = L.marker([lat, lng], { icon: destIcon }).addTo(map);
-            } else {
-                destMarker.setLatLng([lat, lng]);
-            }
-
-            if (!geofenceCircle) {
-                geofenceCircle = L.circle([lat, lng], {
-                    radius: radius,
-                    color: '#00E5FF',
-                    fillColor: '#00E5FF',
-                    fillOpacity: 0.18,
-                    weight: 2,
-                    dashArray: '5, 8'
-                }).addTo(map);
-            } else {
-                geofenceCircle.setLatLng([lat, lng]);
-                geofenceCircle.setRadius(radius);
-            }
-
-            fitBoth();
-            updateRoute();
-        };
-
-        window.clearDestination = function() {
-            if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
-            if (geofenceCircle) { map.removeLayer(geofenceCircle); geofenceCircle = null; }
-            if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
-        };
-
-        // Saved Favorite Stops Layer & Interactive Callout
-        var favoritesLayer = L.layerGroup().addTo(map);
-
-        window.updateFavorites = function(favoritesList) {
-            favoritesLayer.clearLayers();
-            if (!favoritesList || !favoritesList.length) return;
-
-            favoritesList.forEach(function(fav) {
-                var favIcon = L.divIcon({
-                    className: 'fav-marker-leaflet',
-                    html: '<div class="fav-pin-pulse"><div class="fav-pin-star-bubble">★</div><div class="fav-pin-stem"></div></div>',
-                    iconSize: [38, 46],
-                    iconAnchor: [19, 44],
-                    popupAnchor: [0, -44]
-                });
-
-                var marker = L.marker([fav.lat, fav.lng], { icon: favIcon });
-
-                var popupHtml = '<div class="fav-callout-container">' +
-                    '<div class="fav-callout-header">' +
-                        '<span class="fav-callout-tag">★ ' + (fav.tag || 'Favori') + '</span>' +
-                    '</div>' +
-                    '<div class="fav-callout-name">' + fav.name + '</div>' +
-                    (fav.address ? '<div class="fav-callout-addr">' + fav.address + '</div>' : '') +
-                    '<div class="fav-callout-radius">🔔 Réveil à ' + fav.radius + ' m</div>' +
-                    '<button class="fav-callout-btn" onclick="window.Android.onFavoriteSelected(' + fav.id + ')">' +
-                        '🎯 Définir comme destination' +
-                    '</button>' +
-                '</div>';
-
-                marker.bindPopup(popupHtml, {
-                    maxWidth: 240,
-                    className: 'frutiger-aero-popup'
-                });
-
-                favoritesLayer.addLayer(marker);
+        function initLeafletMap() {
+            if (map) return;
+            map = L.map('map', {
+                center: [36.7538, 3.0588],
+                zoom: 14,
+                zoomControl: false,
+                attributionControl: false
             });
-        };
 
-        function updateRoute() {
-            if (userMarker && destMarker) {
-                var userLatLng = userMarker.getLatLng();
-                var destLatLng = destMarker.getLatLng();
-                var points = [userLatLng, destLatLng];
-                if (!routePolyline) {
-                    routePolyline = L.polyline(points, {
-                        color: '#1a73e8',
-                        weight: 4,
-                        dashArray: '6, 8',
-                        opacity: 0.9,
-                        lineCap: 'round'
+            // Resilient High-Performance Tile Layers
+            // Primary: Google Maps tiles, with seamless auto-fallback to Carto Voyager and OSM
+            var tileLayers = {
+                google: L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['0', '1', '2', '3']
+                }),
+                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19
+                }),
+                terrain: L.tileLayer('https://mt{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['0', '1', '2', '3']
+                }),
+                osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19
+                }),
+                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    subdomains: ['a', 'b', 'c', 'd']
+                })
+            };
+
+            var voyagerFallback = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: ['a', 'b', 'c', 'd']
+            });
+
+            var currentStyleKey = '$initialStyle' || 'google';
+            var currentLayer = tileLayers[currentStyleKey] || tileLayers.google;
+            currentLayer.addTo(map);
+
+            // If Google tile has network issues, instantly switch to Carto Voyager
+            currentLayer.on('tileerror', function() {
+                if (!map.hasLayer(voyagerFallback)) {
+                    voyagerFallback.addTo(map);
+                }
+            });
+
+            window.setTileLayer = function(styleId) {
+                if (currentLayer) map.removeLayer(currentLayer);
+                if (map.hasLayer(voyagerFallback)) map.removeLayer(voyagerFallback);
+                currentLayer = tileLayers[styleId] || tileLayers.google;
+                currentLayer.addTo(map);
+            };
+
+            // User Location Marker
+            var userIcon = L.divIcon({
+                className: 'user-icon-leaflet',
+                html: '<div class="user-pulse-container"><div class="user-radar-ring"></div><div class="user-center-dot"></div></div>',
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+            });
+            var userMarker = null;
+
+            window.updateUser = function(lat, lng, accuracy) {
+                if (!userMarker) {
+                    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+                    map.setView([lat, lng], 15);
+                } else {
+                    userMarker.setLatLng([lat, lng]);
+                }
+                updateRoute();
+            };
+
+            // Destination Marker
+            var destPinSvg = '<svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                '<path d="M20 0C8.954 0 0 8.954 0 20C0 35 20 48 20 48C20 48 40 35 40 20C40 8.954 31.046 0 20 0Z" fill="#EA4335"/>' +
+                '<circle cx="20" cy="18" r="8" fill="white"/>' +
+                '<circle cx="20" cy="18" r="4" fill="#B31412"/>' +
+                '</svg>';
+
+            var destIcon = L.divIcon({
+                className: 'dest-icon-leaflet',
+                html: '<div class="dest-pin-container">' + destPinSvg + '</div>',
+                iconSize: [40, 48],
+                iconAnchor: [20, 46]
+            });
+
+            var destMarker = null;
+            var geofenceCircle = null;
+            var routePolyline = null;
+
+            window.setDestination = function(lat, lng, name, radius) {
+                if (!destMarker) {
+                    destMarker = L.marker([lat, lng], { icon: destIcon }).addTo(map);
+                } else {
+                    destMarker.setLatLng([lat, lng]);
+                }
+
+                if (!geofenceCircle) {
+                    geofenceCircle = L.circle([lat, lng], {
+                        radius: radius,
+                        color: '#00E5FF',
+                        fillColor: '#00E5FF',
+                        fillOpacity: 0.20,
+                        weight: 2,
+                        dashArray: '5, 8'
                     }).addTo(map);
                 } else {
-                    routePolyline.setLatLngs(points);
+                    geofenceCircle.setLatLng([lat, lng]);
+                    geofenceCircle.setRadius(radius);
+                }
+
+                fitBoth();
+                updateRoute();
+            };
+
+            window.clearDestination = function() {
+                if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
+                if (geofenceCircle) { map.removeLayer(geofenceCircle); geofenceCircle = null; }
+                if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+            };
+
+            // Saved Favorite Stops Layer & Interactive Callout
+            var favoritesLayer = L.layerGroup().addTo(map);
+
+            window.updateFavorites = function(favoritesList) {
+                favoritesLayer.clearLayers();
+                if (!favoritesList || !favoritesList.length) return;
+
+                favoritesList.forEach(function(fav) {
+                    var favIcon = L.divIcon({
+                        className: 'fav-marker-leaflet',
+                        html: '<div class="fav-pin-pulse"><div class="fav-pin-star-bubble">★</div><div class="fav-pin-stem"></div></div>',
+                        iconSize: [38, 46],
+                        iconAnchor: [19, 44],
+                        popupAnchor: [0, -44]
+                    });
+
+                    var marker = L.marker([fav.lat, fav.lng], { icon: favIcon });
+
+                    var popupHtml = '<div class="fav-callout-container">' +
+                        '<div class="fav-callout-header">' +
+                            '<span class="fav-callout-tag">★ ' + (fav.tag || 'Favori') + '</span>' +
+                        '</div>' +
+                        '<div class="fav-callout-name">' + fav.name + '</div>' +
+                        (fav.address ? '<div class="fav-callout-addr">' + fav.address + '</div>' : '') +
+                        '<div class="fav-callout-radius">🔔 Réveil à ' + fav.radius + ' m</div>' +
+                        '<button class="fav-callout-btn" onclick="window.Android.onFavoriteSelected(' + fav.id + ')">' +
+                            '🎯 Définir comme destination' +
+                        '</button>' +
+                    '</div>';
+
+                    marker.bindPopup(popupHtml, {
+                        maxWidth: 240,
+                        className: 'frutiger-aero-popup'
+                    });
+
+                    favoritesLayer.addLayer(marker);
+                });
+            };
+
+            function updateRoute() {
+                if (userMarker && destMarker) {
+                    var userLatLng = userMarker.getLatLng();
+                    var destLatLng = destMarker.getLatLng();
+                    var points = [userLatLng, destLatLng];
+                    if (!routePolyline) {
+                        routePolyline = L.polyline(points, {
+                            color: '#1a73e8',
+                            weight: 4,
+                            dashArray: '6, 8',
+                            opacity: 0.9,
+                            lineCap: 'round'
+                        }).addTo(map);
+                    } else {
+                        routePolyline.setLatLngs(points);
+                    }
                 }
             }
-        }
 
-        function fitBoth() {
-            if (userMarker && destMarker && geofenceCircle) {
-                var group = new L.featureGroup([userMarker, destMarker, geofenceCircle]);
-                map.fitBounds(group.getBounds().pad(0.3));
-            } else if (destMarker) {
-                map.setView(destMarker.getLatLng(), 15);
+            function fitBoth() {
+                if (userMarker && destMarker && geofenceCircle) {
+                    var group = new L.featureGroup([userMarker, destMarker, geofenceCircle]);
+                    map.fitBounds(group.getBounds().pad(0.3));
+                } else if (destMarker) {
+                    map.setView(destMarker.getLatLng(), 15);
+                }
             }
-        }
 
-        // Map Control Bridge APIs
-        window.centerOnUser = function() {
-            if (userMarker) {
-                map.flyTo(userMarker.getLatLng(), 16, { duration: 1.2 });
+            // Map Control Bridge APIs
+            window.centerOnUser = function() {
+                if (userMarker) {
+                    map.flyTo(userMarker.getLatLng(), 16, { duration: 1.2 });
+                }
+            };
+
+            window.centerOnDest = function() {
+                if (destMarker) {
+                    map.flyTo(destMarker.getLatLng(), 16, { duration: 1.2 });
+                }
+            };
+
+            window.zoomIn = function() {
+                map.zoomIn();
+            };
+
+            window.zoomOut = function() {
+                map.zoomOut();
+            };
+
+            map.on('click', function(e) {
+                if (window.Android && window.Android.onMapClicked) {
+                    window.Android.onMapClicked(e.latlng.lat, e.latlng.lng);
+                }
+            });
+
+            function triggerResize() {
+                if (map) {
+                    map.invalidateSize();
+                }
             }
-        };
+            window.addEventListener('resize', triggerResize);
+            setTimeout(triggerResize, 100);
+            setTimeout(triggerResize, 400);
+            setTimeout(triggerResize, 1000);
 
-        window.centerOnDest = function() {
-            if (destMarker) {
-                map.flyTo(destMarker.getLatLng(), 16, { duration: 1.2 });
-            }
-        };
-
-        window.zoomIn = function() {
-            map.zoomIn();
-        };
-
-        window.zoomOut = function() {
-            map.zoomOut();
-        };
-
-        function triggerResize() {
-            if (map) {
-                map.invalidateSize();
-            }
-        }
-        window.addEventListener('resize', triggerResize);
-        setTimeout(triggerResize, 100);
-        setTimeout(triggerResize, 400);
-        setTimeout(triggerResize, 1200);
-
-        map.on('click', function(e) {
-            if (window.Android && window.Android.onMapClicked) {
-                window.Android.onMapClicked(e.latlng.lat, e.latlng.lng);
-            }
-        });
-
-        setTimeout(function() {
             if (window.Android && window.Android.onMapLoaded) {
                 window.Android.onMapLoaded();
             }
-        }, 500);
+        }
+
+        // Initialize immediately
+        if (typeof L !== 'undefined') {
+            initLeafletMap();
+        } else {
+            window.addEventListener('DOMContentLoaded', function() {
+                if (typeof L !== 'undefined') initLeafletMap();
+            });
+        }
     </script>
 </body>
 </html>

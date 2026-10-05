@@ -128,6 +128,7 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
     var isNavigationMenuOpen by remember { mutableStateOf(false) }
     var isFullscreenMap by remember { mutableStateOf(false) }
     var isSheetExpanded by remember { mutableStateOf(true) }
+    var isNativeMapEngine by remember { mutableStateOf(false) }
 
     // Map control triggers
     var centerUserTrigger by remember { mutableStateOf(0L) }
@@ -180,7 +181,8 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                 centerDestTrigger++
             }
 
-            if (hasValidMapsKey) {
+            // Layer 1: Google Maps Fullscreen View (Interactive High-Performance Web/Tiles or Native SDK)
+            if (isNativeMapEngine) {
                 GoogleMapsComposeView(
                     userLocation = userLocation,
                     destination = destination,
@@ -214,13 +216,15 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                 )
             }
 
-            // Layer 2: Google Maps Right-Hand Floating Controls (Center, Fullscreen, Layers, + , -)
+            // Layer 2: Google Maps Right-Hand Floating Controls (Center, Fullscreen, Layers, Engine Switcher, + , -)
             MapFloatingControls(
                 onCenterLocation = { centerUserTrigger++ },
                 isFullscreen = isFullscreenMap,
                 onToggleFullscreen = { isFullscreenMap = !isFullscreenMap },
                 currentMapStyle = mapStyle,
                 onMapStyleChange = viewModel::setMapStyle,
+                isNativeMap = isNativeMapEngine,
+                onToggleMapEngine = { isNativeMapEngine = it },
                 onZoomIn = { zoomInTrigger++ },
                 onZoomOut = { zoomOutTrigger++ },
                 currentLanguage = language,

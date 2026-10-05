@@ -55,6 +55,8 @@ fun MapFloatingControls(
     onToggleFullscreen: () -> Unit,
     currentMapStyle: MapStyle,
     onMapStyleChange: (MapStyle) -> Unit,
+    isNativeMap: Boolean = false,
+    onToggleMapEngine: (Boolean) -> Unit = {},
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
     currentLanguage: AppLanguage,
@@ -127,6 +129,46 @@ fun MapFloatingControls(
                         }
                     )
                 }
+
+                DropdownMenuItem(
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (!isNativeMap) {
+                                Text("✓ ", color = FrutigerAquaDeep, fontWeight = FontWeight.Bold)
+                            }
+                            Text(
+                                text = "🌐 Google Maps Web",
+                                color = if (!isNativeMap) FrutigerAquaDeep else FrutigerDeepNavy,
+                                fontWeight = if (!isNativeMap) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 13.sp
+                            )
+                        }
+                    },
+                    onClick = {
+                        onToggleMapEngine(false)
+                        isLayersMenuOpen = false
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (isNativeMap) {
+                                Text("✓ ", color = FrutigerAquaDeep, fontWeight = FontWeight.Bold)
+                            }
+                            Text(
+                                text = "⚡ Google Maps SDK Natif",
+                                color = if (isNativeMap) FrutigerAquaDeep else FrutigerDeepNavy,
+                                fontWeight = if (isNativeMap) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 13.sp
+                            )
+                        }
+                    },
+                    onClick = {
+                        onToggleMapEngine(true)
+                        isLayersMenuOpen = false
+                    }
+                )
             }
         }
 
