@@ -147,7 +147,7 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
     var isSheetExpanded by remember { mutableStateOf(true) }
     val hasValidMapsKey = BuildConfig.MAPS_API_KEY.isNotBlank() &&
         !BuildConfig.MAPS_API_KEY.contains("YOUR_GOOGLE_MAPS_API_KEY")
-    var isNativeMapEngine by remember { mutableStateOf(hasValidMapsKey) }
+    var isNativeMapEngine by remember { mutableStateOf(false) }
 
     // Map control triggers
     var centerUserTrigger by remember { mutableStateOf(0L) }
