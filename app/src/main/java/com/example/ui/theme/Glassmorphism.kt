@@ -7,85 +7,97 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Standard Glassmorphism Color Palettes & Brushes
- * Defined according to glassmorphism principles:
- * - Semi-transparent background with deep tint
- * - 1px crisp specular edge border with semi-transparent white
- * - Soft layered shadows and specular light reflections
+ * Frutiger Aero Aqua Glass & Specular Gloss Tokens
+ * Recreates the iconic 2000s glossy, luminous, translucent aero aesthetic:
+ * - Sky-blue & water caustics with grass-green reflection
+ * - Curved specular highlights and glossy caps
+ * - Pure white specular edge shine (1.5px)
+ * - Ultra-high contrast text backing
  */
 object GlassTokens {
-    // Glass Surface Fills (70-80% opacity to let vivid backdrop bleed through)
-    val GlassSurfaceTop = Color(0xFF1E2846).copy(alpha = 0.72f)
-    val GlassSurfaceBottom = Color(0xFF0F1528).copy(alpha = 0.85f)
-    val GlassCardTop = Color(0xFF253055).copy(alpha = 0.68f)
-    val GlassCardBottom = Color(0xFF131A32).copy(alpha = 0.82f)
+    // Frutiger Aero Translucent Aqua Glass Panels (Luminous & Specular)
+    val GlassSurfaceTop = Color(0xD9FFFFFF)
+    val GlassSurfaceBottom = Color(0xC7E0F2FE)
+    val GlassCardTop = Color(0xF2FFFFFF)
+    val GlassCardBottom = Color(0xDDF0FDF4)
 
-    // Specular 1px Border Brushes (Bright white to subtle cyan/indigo)
-    val GlassBorderBrush = Brush.linearGradient(
+    // Darker Aqua mode for high contrast
+    val GlassDeepTop = Color(0xE60A2540)
+    val GlassDeepBottom = Color(0xEB0E3B66)
+
+    // Specular Curved Borders (Brilliant white light at top angle, aquatic cyan at bottom)
+    val GlassBorderBrush = Brush.verticalGradient(
         listOf(
-            Color.White.copy(alpha = 0.35f),
-            Color.White.copy(alpha = 0.10f),
-            Color(0xFF818CF8).copy(alpha = 0.28f),
-            Color.White.copy(alpha = 0.20f)
+            Color.White.copy(alpha = 0.95f),
+            Color(0xFFBAE6FD).copy(alpha = 0.60f),
+            Color(0xFF86EFAC).copy(alpha = 0.45f)
         )
     )
 
-    val GlassCardBorderBrush = Brush.linearGradient(
+    val GlassCardBorderBrush = Brush.verticalGradient(
         listOf(
-            Color.White.copy(alpha = 0.40f),
-            Color(0xFFF43F5E).copy(alpha = 0.25f),
-            Color.White.copy(alpha = 0.12f)
+            Color.White.copy(alpha = 0.98f),
+            Color(0xFF38BDF8).copy(alpha = 0.50f),
+            Color.White.copy(alpha = 0.30f)
         )
     )
 
     val GlassAccentBorderBrush = Brush.linearGradient(
         listOf(
-            Color(0xFF00E5FF).copy(alpha = 0.60f),
-            Color.White.copy(alpha = 0.25f),
-            Color(0xFF8B5CF6).copy(alpha = 0.40f)
+            Color(0xFF00E5FF).copy(alpha = 0.85f),
+            Color.White.copy(alpha = 0.95f),
+            Color(0xFF22C55E).copy(alpha = 0.70f)
         )
     )
 
-    // Vivid Glowing Backdrop Orbs Colors
-    val BackdropCyan = Color(0xFF06B6D4)
-    val BackdropPurple = Color(0xFF8B5CF6)
-    val BackdropPink = Color(0xFFEC4899)
-    val BackdropBlue = Color(0xFF3B82F6)
+    // Gloss Cap Brush (Top half specular shine for buttons and cards)
+    val GlossCapBrush = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.75f),
+            Color.White.copy(alpha = 0.35f),
+            Color.White.copy(alpha = 0.05f)
+        )
+    )
+
+    // Ambient Orbs for Backdrop
+    val BackdropSky = Color(0xFF0099FF)
+    val BackdropGrass = Color(0xFF22C55E)
+    val BackdropAqua = Color(0xFF00E5FF)
+    val BackdropSun = Color(0xFFFACC15)
+    val BackdropPurple = Color(0xFF818CF8)
+    val BackdropBlue = Color(0xFF38BDF8)
+    val BackdropPink = Color(0xFFF43F5E)
 }
 
 /**
- * Reusable Glassmorphism Container with multi-layered depth,
- * specular edge border, and semi-transparent glass fill.
+ * Frutiger Aero Glossy Glass Surface Component
  */
 @Composable
-fun GlassmorphicContainer(
+fun FrutigerAeroGlassPanel(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
+    cornerRadius: Dp = 28.dp,
     elevation: Dp = 16.dp,
-    borderBrush: Brush = GlassTokens.GlassBorderBrush,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier
             .shadow(
                 elevation = elevation,
-                shape = shape,
-                spotColor = Color(0xFF4F46E5).copy(alpha = 0.35f),
-                ambientColor = Color.Black.copy(alpha = 0.5f)
+                shape = RoundedCornerShape(cornerRadius),
+                spotColor = Color(0xFF0284C7).copy(alpha = 0.35f),
+                ambientColor = Color.White.copy(alpha = 0.7f)
             )
-            .clip(shape)
+            .clip(RoundedCornerShape(cornerRadius))
             .background(
                 Brush.verticalGradient(
                     listOf(
@@ -95,22 +107,16 @@ fun GlassmorphicContainer(
                 )
             )
             .border(
-                border = BorderStroke(1.dp, borderBrush),
-                shape = shape
+                BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
+                RoundedCornerShape(cornerRadius)
             )
     ) {
-        // Specular top highlight sheen
+        // Specular Top Gloss Sheen Overlay (Iconic Aero curved highlight)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.08f),
-                            Color.Transparent
-                        )
-                    )
-                )
+                .clip(RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
+                .background(GlassTokens.GlossCapBrush)
         )
         content()
     }

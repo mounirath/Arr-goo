@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.AppLanguage
 import com.example.model.MapStyle
+import com.example.ui.theme.FrutigerAquaDeep
+import com.example.ui.theme.FrutigerDeepNavy
+import com.example.ui.theme.FrutigerGrassGreen
+import com.example.ui.theme.FrutigerSkyBlue
 import com.example.ui.theme.GlassTokens
 
 @Composable
@@ -66,7 +72,7 @@ fun MapFloatingControls(
             icon = Icons.Default.MyLocation,
             contentDescription = "Center on my location",
             testTag = "btn_center_location",
-            tint = Color(0xFF00E5FF),
+            tint = FrutigerAquaDeep,
             onClick = onCenterLocation
         )
 
@@ -75,7 +81,7 @@ fun MapFloatingControls(
             icon = if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
             contentDescription = "Toggle full map view",
             testTag = "btn_toggle_fullscreen",
-            tint = Color.White,
+            tint = FrutigerSkyBlue,
             onClick = onToggleFullscreen
         )
 
@@ -85,7 +91,7 @@ fun MapFloatingControls(
                 icon = Icons.Default.Layers,
                 contentDescription = "Map Style Layers",
                 testTag = "btn_map_layers",
-                tint = Color.White,
+                tint = FrutigerGrassGreen,
                 onClick = { isLayersMenuOpen = true }
             )
 
@@ -93,15 +99,15 @@ fun MapFloatingControls(
                 expanded = isLayersMenuOpen,
                 onDismissRequest = { isLayersMenuOpen = false },
                 modifier = Modifier
-                    .background(Color(0xFF13182C).copy(alpha = 0.95f))
-                    .border(BorderStroke(1.dp, GlassTokens.GlassBorderBrush))
+                    .background(Color.White.copy(alpha = 0.96f))
+                    .border(BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush), RoundedCornerShape(12.dp))
             ) {
                 MapStyle.values().forEach { style ->
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (style == currentMapStyle) {
-                                    Text("✓ ", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold)
+                                    Text("✓ ", color = FrutigerAquaDeep, fontWeight = FontWeight.Bold)
                                 }
                                 Text(
                                     text = when (currentLanguage) {
@@ -109,7 +115,8 @@ fun MapFloatingControls(
                                         AppLanguage.EN -> style.labelEn
                                         AppLanguage.FR -> style.labelFr
                                     },
-                                    color = if (style == currentMapStyle) Color(0xFF00E5FF) else Color.White,
+                                    color = if (style == currentMapStyle) FrutigerAquaDeep else FrutigerDeepNavy,
+                                    fontWeight = if (style == currentMapStyle) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 14.sp
                                 )
                             }
@@ -128,7 +135,7 @@ fun MapFloatingControls(
             icon = Icons.Default.Add,
             contentDescription = "Zoom in",
             testTag = "btn_zoom_in",
-            tint = Color.White,
+            tint = FrutigerDeepNavy,
             onClick = onZoomIn
         )
 
@@ -137,7 +144,7 @@ fun MapFloatingControls(
             icon = Icons.Default.Remove,
             contentDescription = "Zoom out",
             testTag = "btn_zoom_out",
-            tint = Color.White,
+            tint = FrutigerDeepNavy,
             onClick = onZoomOut
         )
     }
@@ -155,27 +162,39 @@ private fun FloatingGlassMapButton(
         modifier = Modifier
             .size(46.dp)
             .shadow(
-                elevation = 12.dp,
+                elevation = 10.dp,
                 shape = RoundedCornerShape(16.dp),
-                spotColor = Color(0xFF4F46E5).copy(alpha = 0.35f)
+                spotColor = Color(0xFF0284C7).copy(alpha = 0.35f),
+                ambientColor = Color.White
             )
             .clip(RoundedCornerShape(16.dp))
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        Color(0xFF1F294C).copy(alpha = 0.72f),
-                        Color(0xFF0E1428).copy(alpha = 0.84f)
+                        Color(0xF8FFFFFF),
+                        Color(0xE6E0F2FE),
+                        Color(0xD9DCFCE7)
                     )
                 )
             )
             .border(
-                BorderStroke(1.dp, GlassTokens.GlassBorderBrush),
+                BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
                 RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onClick)
             .testTag(testTag),
         contentAlignment = Alignment.Center
     ) {
+        // Specular Curved Gloss Cap
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp)
+                .align(Alignment.TopCenter)
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .background(GlassTokens.GlossCapBrush)
+        )
+
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,

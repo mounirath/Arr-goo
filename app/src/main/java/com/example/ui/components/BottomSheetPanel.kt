@@ -8,7 +8,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -62,6 +60,13 @@ import androidx.compose.ui.unit.sp
 import com.example.data.FavoritePlace
 import com.example.model.AppLanguage
 import com.example.model.LocationPoint
+import com.example.ui.theme.FrutigerAqua
+import com.example.ui.theme.FrutigerAquaDeep
+import com.example.ui.theme.FrutigerDeepNavy
+import com.example.ui.theme.FrutigerGrassGreen
+import com.example.ui.theme.FrutigerMeadowDark
+import com.example.ui.theme.FrutigerSkyBlue
+import com.example.ui.theme.FrutigerSlate
 import com.example.ui.theme.GlassTokens
 
 @Composable
@@ -84,15 +89,11 @@ fun GoogleMapsBottomSheet(
     currentLanguage: AppLanguage,
     modifier: Modifier = Modifier
 ) {
-    // Exact requested behavior:
-    // - Menu is closed by default and slightly visible at the bottom of the screen (height: 64dp)
-    // - A horizontal tab/handle is visible above/at the top of the menu
-    // - 1st tap on tab -> OPEN (Slide Up, 350ms)
-    // - 2nd tap on tab -> CLOSE (Slide Down, 350ms)
-    // - 3rd tap -> OPEN, etc.
-    // - DOES NOT close automatically when touching elsewhere on the screen
-    // - NO "X" close button
-    // - Tab is the ONLY control to open or close the menu
+    // Frutiger Aero Sliding Bottom Menu
+    // Closed by default (64dp height with glossy aqua tab)
+    // 1st touch -> OPEN (Slide Up, 350ms)
+    // 2nd touch -> CLOSE (Slide Down, 350ms)
+    // No "X" button, only the tab toggles open/close
     var isMenuOpen by remember { mutableStateOf(false) }
 
     val animatedHeight by animateDpAsState(
@@ -110,31 +111,41 @@ fun GoogleMapsBottomSheet(
         label = "chevron_rotation"
     )
 
-    // Glassmorphism sliding surface container fixed at the bottom
+    // Frutiger Aero Aqua Glass Surface Container
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(animatedHeight)
             .shadow(
-                elevation = 24.dp,
+                elevation = 28.dp,
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                spotColor = Color(0xFF6366F1).copy(alpha = 0.5f),
-                ambientColor = Color.Black.copy(alpha = 0.65f)
+                spotColor = Color(0xFF0284C7).copy(alpha = 0.40f),
+                ambientColor = Color.White.copy(alpha = 0.85f)
             )
             .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        GlassTokens.GlassSurfaceTop,
-                        GlassTokens.GlassSurfaceBottom
+                        Color(0xF5FFFFFF),
+                        Color(0xE6E0F2FE),
+                        Color(0xD9F0FDF4)
                     )
                 )
             )
             .border(
-                BorderStroke(1.dp, GlassTokens.GlassBorderBrush),
+                BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
                 RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
             )
     ) {
+        // Specular Curved Gloss Cap for the entire sheet top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                .background(GlassTokens.GlossCapBrush)
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -142,7 +153,7 @@ fun GoogleMapsBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // =========================================================================
-            // LA LANGUETTE / POIGNÉE HORIZONTALE (Interrupteur Unique Ouvrir / Fermer)
+            // LA LANGUETTE AERO / POIGNÉE HORIZONTALE (Interrupteur Unique)
             // =========================================================================
             Box(
                 modifier = Modifier
@@ -157,26 +168,28 @@ fun GoogleMapsBottomSheet(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    // Languette / Barre horizontale visible et tactile
+                    // Aqua Gloss Pill Bar
                     Box(
                         modifier = Modifier
-                            .width(52.dp)
-                            .height(5.dp)
+                            .width(54.dp)
+                            .height(6.dp)
+                            .shadow(2.dp, RoundedCornerShape(3.dp), spotColor = Color(0xFF0284C7))
                             .clip(RoundedCornerShape(3.dp))
                             .background(
                                 Brush.horizontalGradient(
                                     listOf(
-                                        Color.White.copy(alpha = 0.40f),
-                                        Color(0xFF00E5FF).copy(alpha = 0.80f),
-                                        Color.White.copy(alpha = 0.40f)
+                                        Color(0xFF38BDF8),
+                                        Color.White,
+                                        Color(0xFF4ADE80)
                                     )
                                 )
                             )
+                            .border(BorderStroke(0.5.dp, Color.White), RoundedCornerShape(3.dp))
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Libellé et icône d'état (Interrupteur tactile)
+                    // Luminous status label with high contrast (FrutigerDeepNavy >= 7:1)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
@@ -184,7 +197,7 @@ fun GoogleMapsBottomSheet(
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowUp,
                             contentDescription = if (isMenuOpen) "Fermer le menu" else "Ouvrir le menu",
-                            tint = Color(0xFF00E5FF),
+                            tint = FrutigerAquaDeep,
                             modifier = Modifier
                                 .size(20.dp)
                                 .rotate(chevronRotation)
@@ -206,14 +219,14 @@ fun GoogleMapsBottomSheet(
                             },
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isMenuOpen) Color.White else Color(0xFFE2E8F0)
+                            color = FrutigerDeepNavy
                         )
                     }
                 }
             }
 
             // =========================================================================
-            // CONTENU COMPLET DU MENU COULISSANT (Visible quand ouvert)
+            // CONTENU COMPLET DU MENU COULISSANT
             // =========================================================================
             if (isMenuOpen) {
                 Column(
@@ -223,7 +236,7 @@ fun GoogleMapsBottomSheet(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     // SECTION 1: Destination Header
                     Row(
@@ -240,7 +253,7 @@ fun GoogleMapsBottomSheet(
                                 AppLanguage.FR -> "Cliquer sur la carte 📍"
                             },
                             fontSize = 12.sp,
-                            color = Color(0xFF94A3B8),
+                            color = FrutigerSlate,
                             fontWeight = FontWeight.Medium
                         )
 
@@ -253,7 +266,7 @@ fun GoogleMapsBottomSheet(
                                 },
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = FrutigerDeepNavy
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Box(
@@ -262,10 +275,10 @@ fun GoogleMapsBottomSheet(
                                     .clip(CircleShape)
                                     .background(
                                         Brush.linearGradient(
-                                            listOf(Color(0xFFF43F5E), Color(0xFFEA580C))
+                                            listOf(FrutigerSkyBlue, FrutigerGrassGreen)
                                         )
                                     )
-                                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)), CircleShape),
+                                    .border(BorderStroke(1.dp, Color.White), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -278,48 +291,60 @@ fun GoogleMapsBottomSheet(
                         }
                     }
 
-                    // Destination Glass Card
+                    // Destination Frutiger Aero Glass Card
                     if (destination != null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .shadow(
-                                    elevation = 16.dp,
-                                    shape = RoundedCornerShape(20.dp),
-                                    spotColor = Color(0xFFF43F5E).copy(alpha = 0.3f)
+                                    elevation = 14.dp,
+                                    shape = RoundedCornerShape(22.dp),
+                                    spotColor = Color(0xFF0284C7).copy(alpha = 0.25f),
+                                    ambientColor = Color.White
                                 )
-                                .clip(RoundedCornerShape(20.dp))
+                                .clip(RoundedCornerShape(22.dp))
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
-                                            GlassTokens.GlassCardTop,
-                                            GlassTokens.GlassCardBottom
+                                            Color.White,
+                                            Color(0xFFE8F6FF),
+                                            Color(0xFFDCFCE7)
                                         )
                                     )
                                 )
                                 .border(
-                                    BorderStroke(1.dp, GlassTokens.GlassCardBorderBrush),
-                                    RoundedCornerShape(20.dp)
+                                    BorderStroke(1.5.dp, GlassTokens.GlassCardBorderBrush),
+                                    RoundedCornerShape(22.dp)
                                 )
                                 .testTag("destination_card")
                         ) {
+                            // Top Gloss Specular Sheen
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(34.dp)
+                                    .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+                                    .background(GlassTokens.GlossCapBrush)
+                            )
+
                             Column(modifier = Modifier.padding(14.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Reset Destination Action (NO "X" button!)
+                                    // Reset Destination Action (No "X" icon to avoid ambiguity)
                                     IconButton(
                                         onClick = onClearDestination,
                                         modifier = Modifier
-                                            .size(34.dp)
+                                            .size(36.dp)
                                             .clip(CircleShape)
-                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .background(Color(0xFFE2E8F0).copy(alpha = 0.8f))
+                                            .border(BorderStroke(1.dp, Color.White), CircleShape)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.DeleteSweep,
                                             contentDescription = "Effacer la destination",
-                                            tint = Color(0xFFCBD5E1),
+                                            tint = FrutigerSlate,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }
@@ -334,7 +359,7 @@ fun GoogleMapsBottomSheet(
                                             text = destination.name,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color.White,
+                                            color = FrutigerDeepNavy,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                             textAlign = TextAlign.End
@@ -342,7 +367,7 @@ fun GoogleMapsBottomSheet(
                                         Text(
                                             text = String.format("%.5f , %.5f", destination.longitude, destination.latitude),
                                             fontSize = 11.sp,
-                                            color = Color(0xFFCBD5E1),
+                                            color = FrutigerSlate,
                                             textAlign = TextAlign.End
                                         )
                                         if (userDistanceMeters < Float.MAX_VALUE && userDistanceMeters > 0f) {
@@ -353,9 +378,9 @@ fun GoogleMapsBottomSheet(
                                             }
                                             Text(
                                                 text = distStr,
-                                                fontSize = 14.sp,
+                                                fontSize = 15.sp,
                                                 fontWeight = FontWeight.ExtraBold,
-                                                color = Color(0xFF00E5FF),
+                                                color = FrutigerMeadowDark,
                                                 textAlign = TextAlign.End
                                             )
                                         }
@@ -363,16 +388,18 @@ fun GoogleMapsBottomSheet(
 
                                     Spacer(modifier = Modifier.width(10.dp))
 
+                                    // Aero Nature Pin Icon
                                     Box(
                                         modifier = Modifier
                                             .size(46.dp)
-                                            .clip(RoundedCornerShape(14.dp))
+                                            .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFF0284C7))
+                                            .clip(RoundedCornerShape(16.dp))
                                             .background(
                                                 Brush.linearGradient(
-                                                    listOf(Color(0xFFEA4335), Color(0xFFF97316))
+                                                    listOf(FrutigerSkyBlue, FrutigerAqua)
                                                 )
                                             )
-                                            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)), RoundedCornerShape(14.dp)),
+                                            .border(BorderStroke(1.5.dp, Color.White), RoundedCornerShape(16.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
@@ -386,7 +413,7 @@ fun GoogleMapsBottomSheet(
 
                                 Spacer(modifier = Modifier.height(12.dp))
 
-                                // Action Buttons: "تركيز على الخريطة" and "محفوظ في المفضلة ★"
+                                // Focus on Map & Save Favorite Buttons
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -395,10 +422,15 @@ fun GoogleMapsBottomSheet(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(44.dp)
+                                            .shadow(6.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFF0284C7).copy(alpha = 0.3f))
                                             .clip(RoundedCornerShape(14.dp))
-                                            .background(Color.White.copy(alpha = 0.10f))
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    listOf(Color.White, Color(0xFFE0F2FE))
+                                                )
+                                            )
                                             .border(
-                                                BorderStroke(1.dp, GlassTokens.GlassBorderBrush),
+                                                BorderStroke(1.5.dp, Color.White),
                                                 RoundedCornerShape(14.dp)
                                             )
                                             .clickable(onClick = onFocusDestinationOnMap)
@@ -411,9 +443,9 @@ fun GoogleMapsBottomSheet(
                                                 AppLanguage.EN -> "Focus on map"
                                                 AppLanguage.FR -> "Centrer sur la carte"
                                             },
-                                            color = Color.White,
+                                            color = FrutigerDeepNavy,
                                             fontSize = 12.sp,
-                                            fontWeight = FontWeight.SemiBold
+                                            fontWeight = FontWeight.Bold
                                         )
                                     }
 
@@ -421,10 +453,15 @@ fun GoogleMapsBottomSheet(
                                         modifier = Modifier
                                             .weight(1.2f)
                                             .height(44.dp)
+                                            .shadow(6.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFD97706).copy(alpha = 0.3f))
                                             .clip(RoundedCornerShape(14.dp))
-                                            .background(Color(0xFFD97706).copy(alpha = 0.20f))
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    listOf(Color(0xFFFEF3C7), Color(0xFFFDE68A))
+                                                )
+                                            )
                                             .border(
-                                                BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.5f)),
+                                                BorderStroke(1.5.dp, Color.White),
                                                 RoundedCornerShape(14.dp)
                                             )
                                             .clickable(onClick = onSaveToFavorites)
@@ -437,7 +474,7 @@ fun GoogleMapsBottomSheet(
                                                 AppLanguage.EN -> "Saved in Favorites ★"
                                                 AppLanguage.FR -> "Sauvegarder ★"
                                             },
-                                            color = Color(0xFFFBBF24),
+                                            color = Color(0xFF92400E),
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -450,8 +487,8 @@ fun GoogleMapsBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(18.dp))
-                                .background(Color.White.copy(alpha = 0.08f))
-                                .border(BorderStroke(1.dp, GlassTokens.GlassBorderBrush), RoundedCornerShape(18.dp))
+                                .background(Color.White.copy(alpha = 0.85f))
+                                .border(BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush), RoundedCornerShape(18.dp))
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -462,7 +499,8 @@ fun GoogleMapsBottomSheet(
                                     AppLanguage.FR -> "Recherchez une station ou touchez directement la carte"
                                 },
                                 fontSize = 13.sp,
-                                color = Color(0xFFCBD5E1),
+                                color = FrutigerDeepNavy,
+                                fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -483,8 +521,8 @@ fun GoogleMapsBottomSheet(
                                 AppLanguage.FR -> "Gérer la liste"
                             },
                             fontSize = 12.sp,
-                            color = Color(0xFF60A5FA),
-                            fontWeight = FontWeight.SemiBold,
+                            color = FrutigerAquaDeep,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .clickable(onClick = onOpenFavoritesManager)
                                 .padding(4.dp)
@@ -497,7 +535,7 @@ fun GoogleMapsBottomSheet(
                                 AppLanguage.FR -> "Lieux favoris enregistrés ★"
                             },
                             fontSize = 13.sp,
-                            color = Color(0xFFFBBF24),
+                            color = Color(0xFFB45309),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -509,10 +547,15 @@ fun GoogleMapsBottomSheet(
                         items(favorites) { fav ->
                             Box(
                                 modifier = Modifier
+                                    .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFFF59E0B).copy(alpha = 0.2f))
                                     .clip(RoundedCornerShape(20.dp))
-                                    .background(Color.White.copy(alpha = 0.10f))
+                                    .background(
+                                        Brush.verticalGradient(
+                                            listOf(Color.White, Color(0xFFFEF3C7))
+                                        )
+                                    )
                                     .border(
-                                        BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.4f)),
+                                        BorderStroke(1.dp, Color(0xFFFCD34D)),
                                         RoundedCornerShape(20.dp)
                                     )
                                     .clickable { onSelectFavorite(fav) }
@@ -521,9 +564,9 @@ fun GoogleMapsBottomSheet(
                             ) {
                                 Text(
                                     text = "★ ${fav.name}",
-                                    color = Color.White,
+                                    color = Color(0xFF92400E),
                                     fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
@@ -543,7 +586,7 @@ fun GoogleMapsBottomSheet(
                             text = formatDistance(alertRadiusMeters),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color(0xFF00E5FF)
+                            color = FrutigerAquaDeep
                         )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -555,7 +598,7 @@ fun GoogleMapsBottomSheet(
                                 },
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = FrutigerDeepNavy
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Box(
@@ -564,10 +607,10 @@ fun GoogleMapsBottomSheet(
                                     .clip(CircleShape)
                                     .background(
                                         Brush.linearGradient(
-                                            listOf(Color(0xFF06B6D4), Color(0xFF3B82F6))
+                                            listOf(FrutigerSkyBlue, FrutigerGrassGreen)
                                         )
                                     )
-                                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)), CircleShape),
+                                    .border(BorderStroke(1.dp, Color.White), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -580,27 +623,29 @@ fun GoogleMapsBottomSheet(
                         }
                     }
 
-                    // Distance Glass Card
+                    // Distance Frutiger Aero Glass Card
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .shadow(
-                                elevation = 16.dp,
-                                shape = RoundedCornerShape(20.dp),
-                                spotColor = Color(0xFF0284C7).copy(alpha = 0.25f)
+                                elevation = 14.dp,
+                                shape = RoundedCornerShape(22.dp),
+                                spotColor = Color(0xFF0284C7).copy(alpha = 0.25f),
+                                ambientColor = Color.White
                             )
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(22.dp))
                             .background(
                                 Brush.verticalGradient(
                                     listOf(
-                                        GlassTokens.GlassCardTop,
-                                        GlassTokens.GlassCardBottom
+                                        Color.White,
+                                        Color(0xFFE8F6FF),
+                                        Color(0xFFDCFCE7)
                                     )
                                 )
                             )
                             .border(
-                                BorderStroke(1.dp, GlassTokens.GlassBorderBrush),
-                                RoundedCornerShape(20.dp)
+                                BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
+                                RoundedCornerShape(22.dp)
                             )
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
@@ -615,22 +660,23 @@ fun GoogleMapsBottomSheet(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(38.dp)
+                                            .shadow(if (isSelected) 6.dp else 2.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFF0284C7))
                                             .clip(RoundedCornerShape(14.dp))
                                             .background(
                                                 if (isSelected) {
-                                                    Brush.horizontalGradient(
-                                                        listOf(Color(0xFF0284C7), Color(0xFF06B6D4))
+                                                    Brush.verticalGradient(
+                                                        listOf(Color(0xFF38BDF8), Color(0xFF0284C7))
                                                     )
                                                 } else {
-                                                    Brush.linearGradient(
-                                                        listOf(Color.White.copy(alpha = 0.08f), Color.White.copy(alpha = 0.08f))
+                                                    Brush.verticalGradient(
+                                                        listOf(Color.White, Color(0xFFF1F5F9))
                                                     )
                                                 }
                                             )
                                             .border(
                                                 BorderStroke(
-                                                    1.dp,
-                                                    if (isSelected) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.15f)
+                                                    1.5.dp,
+                                                    if (isSelected) Color.White else Color(0xFFCBD5E1)
                                                 ),
                                                 RoundedCornerShape(14.dp)
                                             )
@@ -642,7 +688,7 @@ fun GoogleMapsBottomSheet(
                                             text = formatDistance(dist),
                                             fontSize = 13.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = Color.White
+                                            color = if (isSelected) Color.White else FrutigerDeepNavy
                                         )
                                     }
                                 }
@@ -655,9 +701,9 @@ fun GoogleMapsBottomSheet(
                                 onValueChange = { onRadiusChange(it.toInt()) },
                                 valueRange = 100f..5000f,
                                 colors = SliderDefaults.colors(
-                                    thumbColor = Color.White,
-                                    activeTrackColor = Color(0xFF00E5FF),
-                                    inactiveTrackColor = Color.White.copy(alpha = 0.18f)
+                                    thumbColor = FrutigerAquaDeep,
+                                    activeTrackColor = FrutigerGrassGreen,
+                                    inactiveTrackColor = Color(0xFFBAE6FD)
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -675,7 +721,8 @@ fun GoogleMapsBottomSheet(
                                         AppLanguage.FR -> "5 km (Train rapide)"
                                     },
                                     fontSize = 11.sp,
-                                    color = Color(0xFF94A3B8)
+                                    color = FrutigerSlate,
+                                    fontWeight = FontWeight.Medium
                                 )
                                 Text(
                                     text = when (currentLanguage) {
@@ -684,7 +731,8 @@ fun GoogleMapsBottomSheet(
                                         AppLanguage.FR -> "100 m (Bus / Tram)"
                                     },
                                     fontSize = 11.sp,
-                                    color = Color(0xFF94A3B8)
+                                    color = FrutigerSlate,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
 
@@ -693,9 +741,9 @@ fun GoogleMapsBottomSheet(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.Black.copy(alpha = 0.28f))
-                                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)), RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(Color(0xFFFEF3C7).copy(alpha = 0.90f))
+                                    .border(BorderStroke(1.dp, Color(0xFFFCD34D)), RoundedCornerShape(14.dp))
                                     .padding(horizontal = 10.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
@@ -707,8 +755,8 @@ fun GoogleMapsBottomSheet(
                                         AppLanguage.FR -> "🔔 Le réveil sonnera lorsque vous serez à ${formatDistance(alertRadiusMeters)} du lieu."
                                     },
                                     fontSize = 12.sp,
-                                    color = Color(0xFFFBBF24),
-                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF78350F),
+                                    fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -717,85 +765,102 @@ fun GoogleMapsBottomSheet(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Big Gradient CTA Button
+                    // Iconic Frutiger Aero Gel CTA Button (Aqua-to-Grass Green with Specular Gloss Cap)
                     Button(
                         onClick = {
                             if (isTripActive) onStopTrip() else onStartTrip()
                         },
                         enabled = destination != null || isTripActive,
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(22.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            disabledContainerColor = Color.White.copy(alpha = 0.08f)
+                            disabledContainerColor = Color(0xFFE2E8F0)
                         ),
                         contentPadding = PaddingValues(0.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                             .shadow(
-                                elevation = 18.dp,
-                                shape = RoundedCornerShape(20.dp),
-                                spotColor = Color(0xFFD946EF).copy(alpha = 0.45f)
+                                elevation = 16.dp,
+                                shape = RoundedCornerShape(22.dp),
+                                spotColor = Color(0xFF10B981).copy(alpha = 0.50f)
                             )
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(22.dp))
                             .background(
                                 if (isTripActive) {
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFFE11D48), Color(0xFFBE123C))
+                                    Brush.verticalGradient(
+                                        listOf(Color(0xFFF43F5E), Color(0xFFBE123C))
                                     )
                                 } else if (destination != null) {
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFFE11D48), Color(0xFF8B5CF6))
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color(0xFF38BDF8),
+                                            Color(0xFF0284C7),
+                                            Color(0xFF10B981)
+                                        )
                                     )
                                 } else {
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF334155), Color(0xFF1E293B))
+                                    Brush.verticalGradient(
+                                        listOf(Color(0xFF94A3B8), Color(0xFF64748B))
                                     )
                                 }
                             )
-                            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)), RoundedCornerShape(20.dp))
+                            .border(BorderStroke(1.5.dp, Color.White), RoundedCornerShape(22.dp))
                             .testTag("btn_main_action")
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = if (isTripActive) {
-                                    when (currentLanguage) {
-                                        AppLanguage.AR -> "إيقاف تتبع الرحلة"
-                                        AppLanguage.EN -> "Stop Trip & Alarm"
-                                        AppLanguage.FR -> "Arrêter le trajet & alarme"
-                                    }
-                                } else {
-                                    when (currentLanguage) {
-                                        AppLanguage.AR -> "بدء تتبع الرحلة والتنبيه"
-                                        AppLanguage.EN -> "Start Trip & Alarm"
-                                        AppLanguage.FR -> "Démarrer le trajet & réveil"
-                                    }
-                                },
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            // Specular Gel Gloss Cap on top half
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(28.dp)
+                                    .align(Alignment.TopCenter)
+                                    .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+                                    .background(GlassTokens.GlossCapBrush)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                imageVector = if (isTripActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = if (isTripActive) {
+                                        when (currentLanguage) {
+                                            AppLanguage.AR -> "إيقاف تتبع الرحلة"
+                                            AppLanguage.EN -> "Stop Trip & Alarm"
+                                            AppLanguage.FR -> "Arrêter le trajet & alarme"
+                                        }
+                                    } else {
+                                        when (currentLanguage) {
+                                            AppLanguage.AR -> "بدء تتبع الرحلة والتنبيه"
+                                            AppLanguage.EN -> "Start Trip & Alarm"
+                                            AppLanguage.FR -> "Démarrer le trajet & réveil"
+                                        }
+                                    },
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = if (isTripActive) Icons.Default.Stop else Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Bottom Sponsored Banner
+                    // Bottom Sponsored Banner (Aero Aqua Badge)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.06f))
+                            .background(Color.White.copy(alpha = 0.85f))
                             .border(BorderStroke(1.dp, GlassTokens.GlassBorderBrush), RoundedCornerShape(14.dp))
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
@@ -807,7 +872,7 @@ fun GoogleMapsBottomSheet(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(Color(0xFFFBBF24))
+                                    .background(Color(0xFFFACC15))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
@@ -821,14 +886,15 @@ fun GoogleMapsBottomSheet(
                             Text(
                                 text = "شريك معتمد • ARRIVA GPS 2026",
                                 fontSize = 11.sp,
-                                color = Color(0xFFCBD5E1)
+                                fontWeight = FontWeight.SemiBold,
+                                color = FrutigerDeepNavy
                             )
 
                             Text(
                                 text = "AD",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF94A3B8)
+                                color = FrutigerAquaDeep
                             )
                         }
                     }

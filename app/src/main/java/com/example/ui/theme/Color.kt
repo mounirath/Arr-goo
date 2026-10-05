@@ -2,23 +2,52 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ARRIVA Brand Colors
-val ArrivaDarkBg = Color(0xFF070B18)
-val ArrivaDarkSurface = Color(0xFF0F172A)
-val ArrivaDarkSurfaceVariant = Color(0xFF1E293B)
-val ArrivaIndigo = Color(0xFF6366F1)
-val ArrivaCyan = Color(0xFF22D3EE)
-val ArrivaCoral = Color(0xFFF43F5E)
-val ArrivaGreen = Color(0xFF10B981)
-val ArrivaAmber = Color(0xFFF59E0B)
+// =========================================================================
+// FRUTIGER AERO COLOR PALETTE (Nature + Optimistic 2000s Technology)
+// =========================================================================
 
-// Light Theme Colors
-val ArrivaLightBg = Color(0xFFF8FAFC)
+// Sky & Aqua Tones (Luminous Sky Blue & Pure Water)
+val FrutigerSkyBlue = Color(0xFF0099FF)
+val FrutigerSkyLight = Color(0xFF38BDF8)
+val FrutigerSkyPale = Color(0xFFBAE6FD)
+val FrutigerAqua = Color(0xFF00E5FF)
+val FrutigerAquaDeep = Color(0xFF0284C7)
+val FrutigerAquaGlass = Color(0x99DFF4FF)
+
+// Meadow & Nature Greens (Dewy Grass, Emerald Leaves)
+val FrutigerGrassGreen = Color(0xFF22C55E)
+val FrutigerGrassLight = Color(0xFF4ADE80)
+val FrutigerEmerald = Color(0xFF10B981)
+val FrutigerMeadowDark = Color(0xFF15803D)
+val FrutigerLeafPale = Color(0xFFDCFCE7)
+
+// Sunlight, Caustics & Lens Flares
+val FrutigerSunbeamYellow = Color(0xFFFACC15)
+val FrutigerSunGlow = Color(0xFFFEF08A)
+val FrutigerCoral = Color(0xFFF43F5E)
+val FrutigerPureWhite = Color(0xFFFFFFFF)
+
+// High Contrast Typography (>= 4.5:1 Contrast Guaranteed)
+val FrutigerDeepNavy = Color(0xFF0A2540) // Deep crisp contrast on aqua glass panels
+val FrutigerSlate = Color(0xFF1E293B)
+val FrutigerTextDim = Color(0xFF334155)
+val FrutigerTextWhite = Color(0xFFFFFFFF)
+val FrutigerTextWhiteDim = Color(0xFFF0FDF4)
+
+// Legacy brand alias mappings
+val ArrivaDarkBg = FrutigerDeepNavy
+val ArrivaDarkSurface = Color(0xFF0F2B48)
+val ArrivaDarkSurfaceVariant = Color(0xFF163E65)
+val ArrivaIndigo = FrutigerSkyBlue
+val ArrivaCyan = FrutigerAqua
+val ArrivaCoral = FrutigerCoral
+val ArrivaGreen = FrutigerGrassGreen
+val ArrivaAmber = FrutigerSunbeamYellow
+
+val ArrivaLightBg = Color(0xFFF0F9FF)
 val ArrivaLightSurface = Color(0xFFFFFFFF)
-val ArrivaLightSurfaceVariant = Color(0xFFE2E8F0)
-val ArrivaLightText = Color(0xFF0F172A)
-val ArrivaLightTextDim = Color(0xFF64748B)
-
-// Dark Theme Colors
-val ArrivaDarkText = Color(0xFFF8FAFC)
-val ArrivaDarkTextDim = Color(0xFF94A3B8)
+val ArrivaLightSurfaceVariant = Color(0xFFE0F2FE)
+val ArrivaLightText = FrutigerDeepNavy
+val ArrivaLightTextDim = FrutigerSlate
+val ArrivaDarkText = FrutigerTextWhite
+val ArrivaDarkTextDim = Color(0xFFE2E8F0)
