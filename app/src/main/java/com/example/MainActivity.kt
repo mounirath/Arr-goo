@@ -54,6 +54,8 @@ import com.example.ui.components.TripHud
 import com.example.ui.map.ArrivaMapView
 import com.example.ui.map.GoogleMapsComposeView
 import com.example.ui.theme.ArrivaTheme
+import com.google.android.gms.maps.MapsInitializer
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
 
@@ -62,6 +64,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Initialize Google Maps SDK in Activity
+        try {
+            MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { renderer ->
+                Log.i("MainActivity", "Google Maps SDK initialized: $renderer")
+            }
+        } catch (e: Exception) {
+            try {
+                MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LEGACY) { renderer ->
+                    Log.i("MainActivity", "Google Maps SDK LEGACY initialized: $renderer")
+                }
+            } catch (ex: Exception) {
+                Log.e("MainActivity", "Error initializing MapsInitializer", ex)
+            }
+        }
 
         setContent {
             val language by viewModel.language.collectAsStateWithLifecycle()
@@ -128,7 +145,9 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
     var isNavigationMenuOpen by remember { mutableStateOf(false) }
     var isFullscreenMap by remember { mutableStateOf(false) }
     var isSheetExpanded by remember { mutableStateOf(true) }
-    var isNativeMapEngine by remember { mutableStateOf(false) }
+    val hasValidMapsKey = BuildConfig.MAPS_API_KEY.isNotBlank() &&
+        !BuildConfig.MAPS_API_KEY.contains("YOUR_GOOGLE_MAPS_API_KEY")
+    var isNativeMapEngine by remember { mutableStateOf(hasValidMapsKey) }
 
     // Map control triggers
     var centerUserTrigger by remember { mutableStateOf(0L) }

@@ -10,7 +10,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".ArrivaApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -20,10 +22,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
 
-        <!-- Clé Google Maps insérée directement -->
+        <!-- Clé Google Maps API validée -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCq2wtmRNcXOYuV0sFCtn0SavzvLi4nlAU" />
+
+        <!-- Version Google Play Services requise par le SDK Google Maps -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".MainActivity"
