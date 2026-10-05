@@ -233,10 +233,12 @@ fun GoogleMapsComposeView(
                 .align(Alignment.TopCenter)
                 .padding(top = 110.dp, start = 16.dp, end = 16.dp)
         ) {
+            val isDarkTerrain = mapStyle == MapStyle.SATELLITE || mapStyle == MapStyle.DARK
             selectedFavorite?.let { fav ->
                 FavoriteStopCalloutCard(
                     favorite = fav,
                     userLocation = userLocation,
+                    isDarkTerrain = isDarkTerrain,
                     onSetAsDestination = {
                         onSelectFavorite(fav)
                         selectedFavorite = null
@@ -249,12 +251,13 @@ fun GoogleMapsComposeView(
 }
 
 /**
- * Frutiger Aero Interactive Callout Card for Favorite Stops
+ * Liquid Glass Interactive Callout Card for Favorite Stops
  */
 @Composable
 fun FavoriteStopCalloutCard(
     favorite: FavoritePlace,
     userLocation: UserLocation,
+    isDarkTerrain: Boolean = false,
     onSetAsDestination: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -268,40 +271,17 @@ fun FavoriteStopCalloutCard(
         )
     }
 
-    Box(
+    val textColor = if (isDarkTerrain) com.example.ui.theme.LiquidGlassTokens.DarkTextPrimary else com.example.ui.theme.LiquidGlassTokens.LightTextPrimary
+    val textSecondaryColor = if (isDarkTerrain) com.example.ui.theme.LiquidGlassTokens.DarkTextSecondary else com.example.ui.theme.LiquidGlassTokens.LightTextSecondary
+
+    com.example.ui.theme.LiquidGlassCapsule(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 20.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = Color(0xFF0284C7).copy(alpha = 0.40f),
-                ambientColor = Color.White
-            )
-            .clip(RoundedCornerShape(24.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color.White,
-                        Color(0xF5E0F2FE),
-                        Color(0xEDDCFCE7)
-                    )
-                )
-            )
-            .border(
-                BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                RoundedCornerShape(24.dp)
-            )
-            .testTag("favorite_callout_view")
+            .testTag("favorite_callout_view"),
+        isDarkTerrain = isDarkTerrain,
+        shape = RoundedCornerShape(26.dp),
+        elevation = 20.dp
     ) {
-        // Specular Curved Gloss Cap
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(28.dp)
-                .align(Alignment.TopCenter)
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .background(GlassTokens.GlossCapBrush)
-        )
 
         Column(
             modifier = Modifier

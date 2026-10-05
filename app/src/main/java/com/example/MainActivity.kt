@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.AppLanguage
 import com.example.model.LocationPoint
+import com.example.model.MapStyle
 import com.example.service.LocationTracker
 import com.example.ui.MainViewModel
 import com.example.ui.components.AddFavoriteDialog
@@ -177,13 +178,7 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Layer 0: Vivid Glass Backdrop Mesh (ambient background beneath map and glass)
-            GlassBackdropMesh(
-                alpha = 0.50f,
-                modifier = Modifier.fillMaxSize()
-            )
-
-            // Layer 1: Google Maps Fullscreen View (Native Google Maps Compose or Tiles Fallback)
+            // Layer 1: Google Maps Fullscreen View (Unrestricted opaque canvas)
             val hasValidMapsKey = BuildConfig.MAPS_API_KEY.isNotBlank() &&
                 !BuildConfig.MAPS_API_KEY.contains("YOUR_GOOGLE_MAPS_API_KEY")
 
@@ -281,7 +276,8 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                     tripState = tripState,
                     userLocation = userLocation,
                     currentLanguage = language,
-                    onStopTrip = viewModel::stopTrip
+                    onStopTrip = viewModel::stopTrip,
+                    isDarkTerrain = mapStyle == MapStyle.SATELLITE || mapStyle == MapStyle.DARK
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +49,8 @@ import com.example.ui.theme.FrutigerGrassGreen
 import com.example.ui.theme.FrutigerMeadowDark
 import com.example.ui.theme.FrutigerSkyBlue
 import com.example.ui.theme.FrutigerSlate
-import com.example.ui.theme.GlassTokens
+import com.example.ui.theme.LiquidGlassCapsule
+import com.example.ui.theme.LiquidGlassTokens
 
 @Composable
 fun TripHud(
@@ -58,50 +58,27 @@ fun TripHud(
     userLocation: UserLocation,
     currentLanguage: AppLanguage,
     onStopTrip: () -> Unit,
+    isDarkTerrain: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val textColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextPrimary else LiquidGlassTokens.LightTextPrimary
+    val textSecondaryColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextSecondary else LiquidGlassTokens.LightTextSecondary
+
     AnimatedVisibility(
         visible = tripState.isActive,
         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
         modifier = modifier
     ) {
-        // Frutiger Aero Translucent Aqua HUD Box
-        Box(
+        // Floating Liquid Glass HUD Capsule
+        LiquidGlassCapsule(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 6.dp)
-                .shadow(
-                    elevation = 16.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    spotColor = Color(0xFF0284C7).copy(alpha = 0.35f),
-                    ambientColor = Color.White
-                )
-                .clip(RoundedCornerShape(24.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            Color.White,
-                            Color(0xF2E0F2FE),
-                            Color(0xE6F0FDF4)
-                        )
-                    )
-                )
-                .border(
-                    BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                    RoundedCornerShape(24.dp)
-                )
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            isDarkTerrain = isDarkTerrain,
+            shape = RoundedCornerShape(26.dp),
+            elevation = 16.dp
         ) {
-            // Specular Top Gloss Sheen
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp)
-                    .align(Alignment.TopCenter)
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(GlassTokens.GlossCapBrush)
-            )
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -150,14 +127,14 @@ fun TripHud(
                                 text = tripState.destination?.name ?: "",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = FrutigerDeepNavy,
+                                color = textColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
 
-                    // Stop trip Aero Gel Button
+                    // Stop trip Capsule Button
                     IconButton(
                         onClick = onStopTrip,
                         modifier = Modifier
@@ -194,7 +171,7 @@ fun TripHud(
                                 AppLanguage.FR -> "Distance restante"
                             },
                             fontSize = 11.sp,
-                            color = FrutigerSlate,
+                            color = textSecondaryColor,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
@@ -203,17 +180,20 @@ fun TripHud(
                             } else "--",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
-                            color = FrutigerMeadowDark
+                            color = if (isDarkTerrain) Color(0xFF38BDF8) else FrutigerMeadowDark
                         )
                     }
 
                     // Speed Pill
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.8f))
-                            .border(BorderStroke(1.dp, Color(0xFFBAE6FD)), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .clip(CircleShape)
+                            .background(if (isDarkTerrain) Color(0x301E293B) else Color.White.copy(alpha = 0.8f))
+                            .border(
+                                BorderStroke(1.dp, if (isDarkTerrain) Color(0x5038BDF8) else Color(0xFFBAE6FD)),
+                                CircleShape
+                            )
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -227,80 +207,56 @@ fun TripHud(
                                 text = "${userLocation.speedKmh.toInt()} km/h",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = FrutigerDeepNavy
+                                color = textColor
                             )
                         }
                     }
 
-                    // Threshold Pill
+                    // Alert Radius Pill
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFFEF3C7))
-                            .border(BorderStroke(1.dp, Color(0xFFFCD34D)), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .clip(CircleShape)
+                            .background(if (isDarkTerrain) Color(0x301E293B) else Color.White.copy(alpha = 0.8f))
+                            .border(
+                                BorderStroke(1.dp, if (isDarkTerrain) Color(0x5038BDF8) else Color(0xFFBAE6FD)),
+                                CircleShape
+                            )
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Alarm,
                                 contentDescription = null,
-                                tint = Color(0xFFB45309),
+                                tint = FrutigerSkyBlue,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = formatDistance(tripState.alertRadiusMeters),
+                                text = "${tripState.alertRadiusMeters} m",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF78350F)
+                                color = textColor
                             )
-                        }
-                    }
-
-                    // ETA Pill
-                    if (tripState.estimatedArrivalSeconds > 0) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.White.copy(alpha = 0.8f))
-                                .border(BorderStroke(1.dp, Color(0xFFBAE6FD)), RoundedCornerShape(12.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = null,
-                                    tint = FrutigerSkyBlue,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                val mins = tripState.estimatedArrivalSeconds / 60
-                                Text(
-                                    text = if (mins > 0) "$mins min" else "< 1 min",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = FrutigerDeepNavy
-                                )
-                            }
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Frutiger Aero Gel Progress Bar
+                // Progress Bar toward Alert Zone
                 val progress = if (tripState.initialDistanceMeters > 0f) {
-                    ((tripState.initialDistanceMeters - tripState.currentDistanceMeters) / tripState.initialDistanceMeters).coerceIn(0f, 1f)
+                    val covered = tripState.initialDistanceMeters - tripState.currentDistanceMeters
+                    (covered / tripState.initialDistanceMeters).coerceIn(0f, 1f)
                 } else 0f
 
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = FrutigerGrassGreen,
-                    trackColor = Color(0xFFBAE6FD)
+                        .height(6.dp)
+                        .clip(CircleShape),
+                    color = if (tripState.isWithinAlertZone) Color(0xFFF43F5E) else FrutigerAquaDeep,
+                    trackColor = if (isDarkTerrain) Color(0x40334155) else Color(0x300284C7)
                 )
             }
         }

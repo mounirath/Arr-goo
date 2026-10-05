@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.NearMe
@@ -60,10 +62,10 @@ import com.example.model.UserLocation
 import com.example.ui.theme.FrutigerAquaDeep
 import com.example.ui.theme.FrutigerDeepNavy
 import com.example.ui.theme.FrutigerGrassGreen
-import com.example.ui.theme.FrutigerMeadowDark
 import com.example.ui.theme.FrutigerSkyBlue
-import com.example.ui.theme.FrutigerSlate
-import com.example.ui.theme.GlassTokens
+import com.example.ui.theme.LiquidGlassButton
+import com.example.ui.theme.LiquidGlassCapsule
+import com.example.ui.theme.LiquidGlassTokens
 
 @Composable
 fun GoogleMapsTopBar(
@@ -80,204 +82,158 @@ fun GoogleMapsTopBar(
     modifier: Modifier = Modifier
 ) {
     var isMapStyleDropdownOpen by remember { mutableStateOf(false) }
+    val isDarkTerrain = currentMapStyle == MapStyle.SATELLITE || currentMapStyle == MapStyle.DARK
+
+    val textColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextPrimary else LiquidGlassTokens.LightTextPrimary
+    val textSecondaryColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextSecondary else LiquidGlassTokens.LightTextSecondary
+    val iconTint = if (isDarkTerrain) LiquidGlassTokens.DarkIconTint else LiquidGlassTokens.LightIconTint
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
-        // Top Header: Hamburger Glass Button + ARRIVA Brand Glass Pill
-        Row(
+        // 1. Unified Floating Liquid Glass Header Bar (Concentric Capsule)
+        LiquidGlassCapsule(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            isDarkTerrain = isDarkTerrain,
+            shape = CircleShape,
+            elevation = 14.dp
         ) {
-            // Hamburger Menu Aero Glass Button
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(46.dp)
-                    .shadow(
-                        elevation = 10.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = Color(0xFF0284C7).copy(alpha = 0.35f),
-                        ambientColor = Color.White
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color(0xF8FFFFFF),
-                                Color(0xE6E0F2FE),
-                                Color(0xD9DCFCE7)
-                            )
-                        )
-                    )
-                    .border(
-                        BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                        RoundedCornerShape(16.dp)
-                    )
-                    .clickable(onClick = onOpenMenu)
-                    .testTag("btn_menu"),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Top Gloss Sheen
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp)
-                        .align(Alignment.TopCenter)
-                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                        .background(GlassTokens.GlossCapBrush)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.Menu,
+                // Menu Button (concentric inner circular capsule)
+                LiquidGlassButton(
+                    onClick = onOpenMenu,
+                    isDarkTerrain = isDarkTerrain,
+                    modifier = Modifier.size(38.dp),
                     contentDescription = "Menu",
-                    tint = FrutigerDeepNavy,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // ARRIVA Brand Badge with Specular Aero Glass
-            Box(
-                modifier = Modifier
-                    .height(46.dp)
-                    .shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(24.dp),
-                        spotColor = Color(0xFF0284C7).copy(alpha = 0.3f),
-                        ambientColor = Color.White
-                    )
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color(0xF8FFFFFF),
-                                Color(0xE6E0F2FE),
-                                Color(0xD9DCFCE7)
-                            )
-                        )
-                    )
-                    .border(
-                        BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                        RoundedCornerShape(24.dp)
-                    )
-            ) {
-                // Top Gloss Sheen
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(20.dp)
-                        .align(Alignment.TopCenter)
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(GlassTokens.GlossCapBrush)
-                )
-
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    testTag = "btn_menu"
                 ) {
-                    GoogleColorsIcon(modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = textColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
 
-                    Column {
-                        Text(
-                            text = "ARRIVA",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 14.sp,
-                            color = FrutigerDeepNavy
-                        )
-                        Text(
-                            text = when (currentLanguage) {
-                                AppLanguage.AR -> "خرائط جوجل • منبه GPS الذكي"
-                                AppLanguage.EN -> "Google Maps • Smart GPS Alarm"
-                                AppLanguage.FR -> "Google Maps • Alarme GPS Réveil"
-                            },
-                            fontSize = 9.sp,
-                            color = FrutigerMeadowDark,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    // Aero Navigation Gel Circle
+                // Brand Pill: ARRIVA in concentric lens alignment
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
-                            .shadow(4.dp, CircleShape, spotColor = Color(0xFF0284C7))
+                            .size(28.dp)
                             .clip(CircleShape)
                             .background(
-                                Brush.linearGradient(
-                                    listOf(FrutigerSkyBlue, FrutigerGrassGreen)
+                                Brush.radialGradient(
+                                    listOf(
+                                        FrutigerAquaDeep,
+                                        FrutigerSkyBlue
+                                    )
                                 )
-                            )
-                            .border(BorderStroke(1.dp, Color.White), CircleShape),
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.NearMe,
-                            contentDescription = "Navigation",
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(16.dp)
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "ARRIVA",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 17.sp,
+                        letterSpacing = 1.sp,
+                        color = textColor
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Small status dot
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(FrutigerGrassGreen)
+                    )
+                }
+
+                // GPS Indicator Pill (concentric inner capsule)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (isDarkTerrain) Color(0x3010B981) else Color(0x2510B981))
+                        .border(
+                            BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.5f)),
+                            CircleShape
+                        )
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF10B981))
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "GPS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isDarkTerrain) Color(0xFF86EFAC) else Color(0xFF15803D)
+                    )
                 }
             }
         }
 
-        // Floating Aero Glass Search Capsule
-        Box(
+        // 2. Liquid Glass Floating Search Bar (Capsule Geometry)
+        LiquidGlassCapsule(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .shadow(
-                    elevation = 14.dp,
-                    shape = RoundedCornerShape(26.dp),
-                    spotColor = Color(0xFF0284C7).copy(alpha = 0.3f),
-                    ambientColor = Color.White
-                )
-                .clip(RoundedCornerShape(26.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            Color.White,
-                            Color(0xF0E0F2FE),
-                            Color(0xE6F0FDF4)
-                        )
-                    )
-                )
-                .border(
-                    BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                    RoundedCornerShape(26.dp)
-                )
+                .padding(bottom = 6.dp),
+            isDarkTerrain = isDarkTerrain,
+            shape = CircleShape,
+            elevation = 16.dp
         ) {
-            // Specular Top Gloss Sheen
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp)
-                    .align(Alignment.TopCenter)
-                    .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
-                    .background(GlassTokens.GlossCapBrush)
-            )
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp),
+                    .padding(horizontal = 6.dp, vertical = 3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = FrutigerSkyBlue,
-                    modifier = Modifier.size(22.dp)
-                )
+                // Search Icon in concentric circular refraction lens
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(if (isDarkTerrain) Color(0x20FFFFFF) else Color(0x150284C7)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = iconTint,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 TextField(
                     value = query,
@@ -285,12 +241,12 @@ fun GoogleMapsTopBar(
                     placeholder = {
                         Text(
                             text = when (currentLanguage) {
-                                AppLanguage.AR -> "ابحث عن محطة، عنوان، موقف أو مكان..."
-                                AppLanguage.EN -> "Search station, address, stop or place..."
-                                AppLanguage.FR -> "Rechercher gare, adresse, arrêt ou lieu..."
+                                AppLanguage.AR -> "ابحث عن محطة، عنوان، موقف أو وجهة..."
+                                AppLanguage.EN -> "Search station, address or destination..."
+                                AppLanguage.FR -> "Rechercher gare, arrêt ou adresse..."
                             },
-                            fontSize = 13.sp,
-                            color = FrutigerSlate,
+                            color = textSecondaryColor,
+                            fontSize = 14.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -302,239 +258,92 @@ fun GoogleMapsTopBar(
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        focusedTextColor = FrutigerDeepNavy,
-                        unfocusedTextColor = FrutigerDeepNavy
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedTextColor = textColor,
+                        unfocusedTextColor = textColor
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .testTag("google_search_input")
+                        .testTag("search_input_field")
                 )
 
                 if (isSearching) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .padding(end = 6.dp),
                         strokeWidth = 2.dp,
-                        color = FrutigerSkyBlue
+                        color = iconTint
                     )
                 } else if (query.isNotBlank()) {
                     IconButton(
                         onClick = { onQueryChange("") },
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Clear",
-                            tint = FrutigerSlate,
-                            modifier = Modifier.size(18.dp)
+                            contentDescription = "Clear search",
+                            tint = textSecondaryColor,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
             }
         }
 
-        // Sub-filter pill row with Frutiger Aero Glass Surfaces
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Google Maps Layer selector glass pill
-            Box {
-                Box(
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 6.dp,
-                            shape = RoundedCornerShape(16.dp),
-                            spotColor = Color(0xFF0284C7).copy(alpha = 0.2f),
-                            ambientColor = Color.White
-                        )
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.White,
-                                    Color(0xE6E0F2FE)
-                                )
-                            )
-                        )
-                        .border(
-                            BorderStroke(1.dp, GlassTokens.GlassBorderBrush),
-                            RoundedCornerShape(16.dp)
-                        )
-                        .clickable { isMapStyleDropdownOpen = true }
-                        .testTag("pill_map_style")
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "🗺️",
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = when (currentLanguage) {
-                                AppLanguage.AR -> currentMapStyle.labelAr
-                                AppLanguage.EN -> currentMapStyle.labelEn
-                                AppLanguage.FR -> currentMapStyle.labelFr
-                            },
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = FrutigerDeepNavy
-                        )
-                    }
-                }
-
-                DropdownMenu(
-                    expanded = isMapStyleDropdownOpen,
-                    onDismissRequest = { isMapStyleDropdownOpen = false },
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.96f))
-                        .border(BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush), RoundedCornerShape(12.dp))
-                ) {
-                    MapStyle.values().forEach { style ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = when (currentLanguage) {
-                                        AppLanguage.AR -> style.labelAr
-                                        AppLanguage.EN -> style.labelEn
-                                        AppLanguage.FR -> style.labelFr
-                                    },
-                                    color = if (style == currentMapStyle) FrutigerSkyBlue else FrutigerDeepNavy,
-                                    fontWeight = if (style == currentMapStyle) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = 13.sp
-                                )
-                            },
-                            onClick = {
-                                onMapStyleChange(style)
-                                isMapStyleDropdownOpen = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // GPS Signal Aero Status Pill
-            Box(
-                modifier = Modifier
-                    .shadow(
-                        elevation = 6.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        spotColor = Color(0xFF10B981).copy(alpha = 0.2f),
-                        ambientColor = Color.White
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.White,
-                                Color(0xE6DCFCE7)
-                            )
-                        )
-                    )
-                    .border(
-                        BorderStroke(1.dp, GlassTokens.GlassBorderBrush),
-                        RoundedCornerShape(16.dp)
-                    )
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(if (userLocation.isGpsActive) FrutigerGrassGreen else Color(0xFFF59E0B))
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (userLocation.isGpsActive) {
-                            when (currentLanguage) {
-                                AppLanguage.AR -> "إشارة GPS نشطة"
-                                AppLanguage.EN -> "GPS Active"
-                                AppLanguage.FR -> "GPS Actif"
-                            }
-                        } else {
-                            when (currentLanguage) {
-                                AppLanguage.AR -> "جاري تحديد الموقع"
-                                AppLanguage.EN -> "Locating..."
-                                AppLanguage.FR -> "Recherche GPS"
-                            }
-                        },
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = FrutigerDeepNavy
-                    )
-                }
-            }
-        }
-
-        // Live Search Results Dropdown with Frutiger Aero Glass Panel
+        // 3. Search Results Overlay (Floats cleanly over map, opaque items with refractive rim)
         AnimatedVisibility(
-            visible = searchResults.isNotEmpty() && query.isNotBlank(),
+            visible = searchResults.isNotEmpty(),
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp)
+                    .padding(top = 4.dp)
                     .shadow(
-                        elevation = 18.dp,
-                        shape = RoundedCornerShape(20.dp),
+                        elevation = 20.dp,
+                        shape = RoundedCornerShape(24.dp),
                         spotColor = Color(0xFF0284C7).copy(alpha = 0.35f),
                         ambientColor = Color.White
                     )
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.White,
-                                Color(0xF5E0F2FE),
-                                Color(0xEDDCFCE7)
-                            )
-                        )
+                        if (isDarkTerrain) Color(0xF20F172A) else Color(0xFAF8FAFC)
                     )
                     .border(
-                        BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                        RoundedCornerShape(20.dp)
+                        BorderStroke(
+                            1.25.dp,
+                            if (isDarkTerrain) LiquidGlassTokens.DarkRefractionBorder else LiquidGlassTokens.LightRefractionBorder
+                        ),
+                        RoundedCornerShape(24.dp)
                     )
             ) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 260.dp),
-                    contentPadding = PaddingValues(8.dp)
+                        .heightIn(max = 240.dp),
+                    contentPadding = PaddingValues(vertical = 6.dp)
                 ) {
                     items(searchResults) { place ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
                                 .clickable { onSelectPlace(place) }
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(FrutigerSkyBlue, FrutigerGrassGreen)
-                                        )
-                                    ),
+                                    .background(if (isDarkTerrain) Color(0x3038BDF8) else Color(0x1F0284C7)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = iconTint,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -544,15 +353,17 @@ fun GoogleMapsTopBar(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = place.name,
-                                    fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
-                                    color = FrutigerDeepNavy
+                                    fontWeight = FontWeight.Bold,
+                                    color = textColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 if (place.address.isNotBlank()) {
                                     Text(
                                         text = place.address,
-                                        fontSize = 11.sp,
-                                        color = FrutigerSlate,
+                                        fontSize = 12.sp,
+                                        color = textSecondaryColor,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -563,19 +374,5 @@ fun GoogleMapsTopBar(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun GoogleColorsIcon(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(Color(0xFF4285F4)))
-        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(Color(0xFFEA4335)))
-        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(Color(0xFFFBBC05)))
-        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(Color(0xFF34A853)))
     }
 }
