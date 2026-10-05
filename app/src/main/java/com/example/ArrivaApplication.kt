@@ -2,20 +2,30 @@ package com.example
 
 import android.app.Application
 import android.util.Log
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
 /**
  * ArrivaApplication - Application entry point.
- * Guarantees early initialization of Google Maps SDK with dual-renderer support:
- * - Attempts MapsInitializer.Renderer.LATEST
- * - Gracefully falls back to MapsInitializer.Renderer.LEGACY if LATEST cannot be initialized
+ * Guarantees early initialization of Google Maps SDK and Google AdMob.
  */
 class ArrivaApplication : Application(), OnMapsSdkInitializedCallback {
 
     override fun onCreate() {
         super.onCreate()
         initializeGoogleMapsSdk()
+        initializeAdMob()
+    }
+
+    private fun initializeAdMob() {
+        try {
+            MobileAds.initialize(this) { status ->
+                Log.d("ArrivaApplication", "AdMob MobileAds initialized successfully: $status")
+            }
+        } catch (e: Exception) {
+            Log.e("ArrivaApplication", "Failed to initialize AdMob MobileAds", e)
+        }
     }
 
     private fun initializeGoogleMapsSdk() {

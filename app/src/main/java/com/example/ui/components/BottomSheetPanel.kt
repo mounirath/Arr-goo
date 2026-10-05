@@ -836,51 +836,12 @@ fun GoogleMapsBottomSheet(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    // Bottom Sponsored Banner (Aero Aqua Badge)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.85f))
-                            .border(BorderStroke(1.dp, GlassTokens.GlassBorderBrush), RoundedCornerShape(14.dp))
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(Color(0xFFFACC15))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "إعلان ممول",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black
-                                )
-                            }
-
-                            Text(
-                                text = "شريك معتمد • ARRIVA GPS 2026",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = FrutigerDeepNavy
-                            )
-
-                            Text(
-                                text = "AD",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = FrutigerAquaDeep
-                            )
-                        }
-                    }
+                    // Real Google AdMob Banner Integration
+                    AdMobBanner(
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
