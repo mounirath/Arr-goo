@@ -99,6 +99,7 @@ fun GoogleMapsComposeView(
     }
 
     val mapType = when (mapStyle) {
+        MapStyle.OPENSTREETMAP -> MapType.NORMAL
         MapStyle.GOOGLE_MAPS -> MapType.NORMAL
         MapStyle.SATELLITE -> MapType.HYBRID
         MapStyle.TERRAIN -> MapType.TERRAIN

@@ -7,9 +7,10 @@ enum class AlarmTone(val id: String, val labelFr: String, val labelAr: String, v
 }
 
 enum class MapStyle(val id: String, val labelFr: String, val labelAr: String, val labelEn: String) {
-    GOOGLE_MAPS("google", "Google Maps", "خرائط جوجل", "Google Maps"),
-    SATELLITE("satellite", "Satellite Google", "قمر صناعي جوجل", "Google Satellite"),
-    TERRAIN("terrain", "Relief Google", "تضاريس جوجل", "Google Terrain"),
+    OPENSTREETMAP("osm", "OpenStreetMap", "خريطة الشارع المفتوحة", "OpenStreetMap"),
+    GOOGLE_MAPS("google", "Google Maps (Voyager)", "خرائط جوجل", "Google Maps"),
+    SATELLITE("satellite", "Satellite (Esri / Google)", "قمر صناعي", "Satellite"),
+    TERRAIN("terrain", "Relief (OpenTopo)", "تضاريس", "Terrain"),
     DARK("dark", "Sombre Carto", "داكن", "Carto Dark")
 }
 

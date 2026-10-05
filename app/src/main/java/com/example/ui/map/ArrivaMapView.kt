@@ -397,7 +397,14 @@ private fun generateMapHtml(initialStyle: String, initialLat: Double, initialLng
 
             // OpenStreetMap Standard
             var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            });
+
+            // OpenTopoMap (Topographic Terrain)
+            var terrainLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                maxZoom: 17,
+                subdomains: ['a', 'b', 'c']
             });
 
             // Carto Dark
@@ -407,10 +414,10 @@ private fun generateMapHtml(initialStyle: String, initialLat: Double, initialLng
             });
 
             var tileLayers = {
+                osm: osmLayer,
                 google: voyagerLayer,
                 satellite: satelliteLayer,
-                terrain: osmLayer,
-                osm: osmLayer,
+                terrain: terrainLayer,
                 dark: darkLayer
             };
 
