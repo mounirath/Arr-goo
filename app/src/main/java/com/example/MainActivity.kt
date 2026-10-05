@@ -146,9 +146,6 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
     var isNavigationMenuOpen by remember { mutableStateOf(false) }
     var isFullscreenMap by remember { mutableStateOf(false) }
     var isSheetExpanded by remember { mutableStateOf(true) }
-    val hasValidMapsKey = BuildConfig.MAPS_API_KEY.isNotBlank() &&
-        !BuildConfig.MAPS_API_KEY.contains("YOUR_GOOGLE_MAPS_API_KEY")
-    var isNativeMapEngine by remember { mutableStateOf(false) }
 
     // Map control triggers
     var centerUserTrigger by remember { mutableStateOf(0L) }
@@ -195,9 +192,9 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                 centerDestTrigger++
             }
 
-            // Layer 1: Google Maps Fullscreen View (Interactive High-Performance Web/Tiles or Native SDK)
-            if (isNativeMapEngine) {
-                GoogleMapsComposeView(
+            // Layer 1: Map View (OpenStreetMap via Leaflet or Native Google Maps SDK)
+            if (mapStyle == MapStyle.OPENSTREETMAP) {
+                ArrivaMapView(
                     userLocation = userLocation,
                     destination = destination,
                     alertRadiusMeters = alertRadius,
@@ -213,7 +210,7 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                     zoomOutTrigger = zoomOutTrigger
                 )
             } else {
-                ArrivaMapView(
+                GoogleMapsComposeView(
                     userLocation = userLocation,
                     destination = destination,
                     alertRadiusMeters = alertRadius,
@@ -230,15 +227,13 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                 )
             }
 
-            // Layer 2: Google Maps Right-Hand Floating Controls (Center, Fullscreen, Layers, Engine Switcher, + , -)
+            // Layer 2: Right-Hand Floating Controls (Center, Fullscreen, Layers, + , -)
             MapFloatingControls(
                 onCenterLocation = { centerUserTrigger++ },
                 isFullscreen = isFullscreenMap,
                 onToggleFullscreen = { isFullscreenMap = !isFullscreenMap },
                 currentMapStyle = mapStyle,
                 onMapStyleChange = viewModel::setMapStyle,
-                isNativeMap = isNativeMapEngine,
-                onToggleMapEngine = { isNativeMapEngine = it },
                 onZoomIn = { zoomInTrigger++ },
                 onZoomOut = { zoomOutTrigger++ },
                 currentLanguage = language,

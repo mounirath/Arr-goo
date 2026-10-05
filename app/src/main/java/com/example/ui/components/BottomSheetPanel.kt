@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +69,7 @@ import com.example.ui.theme.FrutigerMeadowDark
 import com.example.ui.theme.FrutigerSkyBlue
 import com.example.ui.theme.FrutigerSlate
 import com.example.ui.theme.GlassTokens
+import com.example.ui.theme.Y2KTokens
 
 @Composable
 fun GoogleMapsBottomSheet(
@@ -89,11 +91,7 @@ fun GoogleMapsBottomSheet(
     currentLanguage: AppLanguage,
     modifier: Modifier = Modifier
 ) {
-    // Frutiger Aero Sliding Bottom Menu
-    // Closed by default (64dp height with glossy aqua tab)
-    // 1st touch -> OPEN (Slide Up, 350ms)
-    // 2nd touch -> CLOSE (Slide Down, 350ms)
-    // No "X" button, only the tab toggles open/close
+    // Y2K Sliding Bottom Console
     var isMenuOpen by remember { mutableStateOf(false) }
 
     val animatedHeight by animateDpAsState(
@@ -111,39 +109,31 @@ fun GoogleMapsBottomSheet(
         label = "chevron_rotation"
     )
 
-    // Frutiger Aero Aqua Glass Surface Container
+    // Y2K Liquid-Chrome Cyber Surface Container
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(animatedHeight)
             .shadow(
                 elevation = 28.dp,
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                spotColor = Color(0xFF0284C7).copy(alpha = 0.40f),
-                ambientColor = Color.White.copy(alpha = 0.85f)
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                spotColor = Color(0xFF00F0FF).copy(alpha = 0.40f),
+                ambientColor = Color.White.copy(alpha = 0.25f)
             )
-            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xF5FFFFFF),
-                        Color(0xE6E0F2FE),
-                        Color(0xD9F0FDF4)
-                    )
-                )
-            )
+            .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .background(Y2KTokens.CyberChromeDark.copy(alpha = 0.96f))
             .border(
-                BorderStroke(1.5.dp, GlassTokens.GlassBorderBrush),
-                RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                BorderStroke(1.5.dp, Y2KTokens.ChromeBorderBrush),
+                RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
             )
     ) {
-        // Specular Curved Gloss Cap for the entire sheet top
+        // Specular Mirror Top Sheen
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-                .background(GlassTokens.GlossCapBrush)
+                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .background(Y2KTokens.SpecularGlossCap)
         )
 
         Column(
@@ -153,13 +143,13 @@ fun GoogleMapsBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // =========================================================================
-            // LA LANGUETTE AERO / POIGNÉE HORIZONTALE (Interrupteur Unique)
+            // LA LANGUETTE / POIGNÉE LIQUID-CHROME
             // =========================================================================
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                     .clickable { isMenuOpen = !isMenuOpen }
                     .testTag("sliding_menu_tab_handle"),
                 contentAlignment = Alignment.Center
@@ -168,28 +158,20 @@ fun GoogleMapsBottomSheet(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    // Aqua Gloss Pill Bar
+                    // Liquid-Chrome Handle Pill
                     Box(
                         modifier = Modifier
                             .width(54.dp)
                             .height(6.dp)
-                            .shadow(2.dp, RoundedCornerShape(3.dp), spotColor = Color(0xFF0284C7))
+                            .shadow(2.dp, RoundedCornerShape(3.dp), spotColor = Color(0xFF00F0FF))
                             .clip(RoundedCornerShape(3.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color(0xFF38BDF8),
-                                        Color.White,
-                                        Color(0xFF4ADE80)
-                                    )
-                                )
-                            )
+                            .background(Y2KTokens.LiquidChromeBrush)
                             .border(BorderStroke(0.5.dp, Color.White), RoundedCornerShape(3.dp))
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Luminous status label with high contrast (FrutigerDeepNavy >= 7:1)
+                    // Luminous status label with Y2K high contrast
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
@@ -197,7 +179,7 @@ fun GoogleMapsBottomSheet(
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowUp,
                             contentDescription = if (isMenuOpen) "Fermer le menu" else "Ouvrir le menu",
-                            tint = FrutigerAquaDeep,
+                            tint = Y2KTokens.TextCyanGlow,
                             modifier = Modifier
                                 .size(20.dp)
                                 .rotate(chevronRotation)
@@ -217,9 +199,10 @@ fun GoogleMapsBottomSheet(
                                     AppLanguage.FR -> "Toucher la languette pour ouvrir ▴"
                                 }
                             },
-                            fontSize = 12.sp,
+                            fontFamily = FontFamily.SansSerif,
                             fontWeight = FontWeight.Bold,
-                            color = FrutigerDeepNavy
+                            fontSize = 12.sp,
+                            color = Y2KTokens.TextCyanGlow
                         )
                     }
                 }

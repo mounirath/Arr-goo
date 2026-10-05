@@ -26,14 +26,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -51,6 +47,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,13 +57,11 @@ import com.example.model.AppLanguage
 import com.example.model.LocationPoint
 import com.example.model.MapStyle
 import com.example.model.UserLocation
-import com.example.ui.theme.FrutigerAquaDeep
-import com.example.ui.theme.FrutigerDeepNavy
-import com.example.ui.theme.FrutigerGrassGreen
-import com.example.ui.theme.FrutigerSkyBlue
-import com.example.ui.theme.LiquidGlassButton
-import com.example.ui.theme.LiquidGlassCapsule
-import com.example.ui.theme.LiquidGlassTokens
+import com.example.ui.theme.Y2KChromeSurface
+import com.example.ui.theme.Y2KGelButton
+import com.example.ui.theme.Y2KTechnoText
+import com.example.ui.theme.Y2KTelemetryTag
+import com.example.ui.theme.Y2KTokens
 
 @Composable
 fun GoogleMapsTopBar(
@@ -81,24 +77,16 @@ fun GoogleMapsTopBar(
     onOpenMenu: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isMapStyleDropdownOpen by remember { mutableStateOf(false) }
-    val isDarkTerrain = currentMapStyle == MapStyle.SATELLITE || currentMapStyle == MapStyle.DARK
-
-    val textColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextPrimary else LiquidGlassTokens.LightTextPrimary
-    val textSecondaryColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextSecondary else LiquidGlassTokens.LightTextSecondary
-    val iconTint = if (isDarkTerrain) LiquidGlassTokens.DarkIconTint else LiquidGlassTokens.LightIconTint
-
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
-        // 1. Unified Floating Liquid Glass Header Bar (Concentric Capsule)
-        LiquidGlassCapsule(
+        // 1. Y2K Liquid-Chrome Floating Navigation Header
+        Y2KChromeSurface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
-            isDarkTerrain = isDarkTerrain,
             shape = CircleShape,
             elevation = 14.dp
         ) {
@@ -109,10 +97,10 @@ fun GoogleMapsTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Menu Button (concentric inner circular capsule)
-                LiquidGlassButton(
+                // Menu Button (Chrome & Gel Sheen)
+                Y2KGelButton(
                     onClick = onOpenMenu,
-                    isDarkTerrain = isDarkTerrain,
+                    brush = Y2KTokens.LiquidChromeBrush,
                     modifier = Modifier.size(38.dp),
                     contentDescription = "Menu",
                     testTag = "btn_menu"
@@ -120,28 +108,22 @@ fun GoogleMapsTopBar(
                     Icon(
                         imageVector = Icons.Default.Menu,
                         contentDescription = "Menu",
-                        tint = textColor,
+                        tint = Y2KTokens.CyberChromeDark,
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // Brand Pill: ARRIVA in concentric lens alignment
+                // Brand Emblem: ARRIVA // CYBER.NAV (Eurostile Wide Italic Display Type)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
+                    // Holographic Globe / Compass
                     Box(
                         modifier = Modifier
                             .size(28.dp)
                             .clip(CircleShape)
-                            .background(
-                                Brush.radialGradient(
-                                    listOf(
-                                        FrutigerAquaDeep,
-                                        FrutigerSkyBlue
-                                    )
-                                )
-                            ),
+                            .background(Y2KTokens.HolographicGelBrush),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -154,82 +136,59 @@ fun GoogleMapsTopBar(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
+                    Y2KTechnoText(
                         text = "ARRIVA",
-                        fontWeight = FontWeight.Black,
                         fontSize = 17.sp,
-                        letterSpacing = 1.sp,
-                        color = textColor
+                        letterSpacing = 2.5.sp,
+                        color = Y2KTokens.TextPureWhite
                     )
 
                     Spacer(modifier = Modifier.width(6.dp))
 
-                    // Small status dot
+                    // Pulsing Cyan Telemetry Orb
                     Box(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(FrutigerGrassGreen)
+                            .background(Y2KTokens.TextCyanGlow)
                     )
                 }
 
-                // GPS Indicator Pill (concentric inner capsule)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(if (isDarkTerrain) Color(0x3010B981) else Color(0x2510B981))
-                        .border(
-                            BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.5f)),
-                            CircleShape
-                        )
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF10B981))
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(
-                        text = "GPS",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isDarkTerrain) Color(0xFF86EFAC) else Color(0xFF15803D)
-                    )
-                }
+                // Pixel-Font Telemetry Chip
+                Y2KTelemetryTag(
+                    text = "GPS.2000",
+                    tagColor = Y2KTokens.TextCyanGlow
+                )
             }
         }
 
-        // 2. Liquid Glass Floating Search Bar (Capsule Geometry)
-        LiquidGlassCapsule(
+        // 2. Y2K Liquid-Chrome Search Bar
+        Y2KChromeSurface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 6.dp),
-            isDarkTerrain = isDarkTerrain,
             shape = CircleShape,
             elevation = 16.dp
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 3.dp),
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Search Icon in concentric circular refraction lens
+                // Electric Cyan Search Lens
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
-                        .background(if (isDarkTerrain) Color(0x20FFFFFF) else Color(0x150284C7)),
+                        .background(Y2KTokens.ObsidianVoid),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = iconTint,
-                        modifier = Modifier.size(20.dp)
+                        tint = Y2KTokens.TextCyanGlow,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
@@ -242,11 +201,12 @@ fun GoogleMapsTopBar(
                         Text(
                             text = when (currentLanguage) {
                                 AppLanguage.AR -> "ابحث عن محطة، عنوان، موقف أو وجهة..."
-                                AppLanguage.EN -> "Search station, address or destination..."
-                                AppLanguage.FR -> "Rechercher gare, arrêt ou adresse..."
+                                AppLanguage.EN -> "ENTER DESTINATION // COORD..."
+                                AppLanguage.FR -> "RECHERCHER DESTINATION // GARE..."
                             },
-                            color = textSecondaryColor,
-                            fontSize = 14.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Y2KTokens.TextMutedSteel,
+                            fontSize = 13.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -259,8 +219,8 @@ fun GoogleMapsTopBar(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
-                        focusedTextColor = textColor,
-                        unfocusedTextColor = textColor
+                        focusedTextColor = Y2KTokens.TextPureWhite,
+                        unfocusedTextColor = Y2KTokens.TextSilver
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -273,7 +233,7 @@ fun GoogleMapsTopBar(
                             .size(18.dp)
                             .padding(end = 6.dp),
                         strokeWidth = 2.dp,
-                        color = iconTint
+                        color = Y2KTokens.TextCyanGlow
                     )
                 } else if (query.isNotBlank()) {
                     IconButton(
@@ -283,7 +243,7 @@ fun GoogleMapsTopBar(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Clear search",
-                            tint = textSecondaryColor,
+                            tint = Y2KTokens.TextSilver,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -291,7 +251,7 @@ fun GoogleMapsTopBar(
             }
         }
 
-        // 3. Search Results Overlay (Floats cleanly over map, opaque items with refractive rim)
+        // 3. Search Results Overlay (Y2K Metallic Dark Floating Console)
         AnimatedVisibility(
             visible = searchResults.isNotEmpty(),
             enter = fadeIn(),
@@ -302,21 +262,16 @@ fun GoogleMapsTopBar(
                     .fillMaxWidth()
                     .padding(top = 4.dp)
                     .shadow(
-                        elevation = 20.dp,
-                        shape = RoundedCornerShape(24.dp),
-                        spotColor = Color(0xFF0284C7).copy(alpha = 0.35f),
+                        elevation = 22.dp,
+                        shape = RoundedCornerShape(20.dp),
+                        spotColor = Color(0xFF00F0FF).copy(alpha = 0.40f),
                         ambientColor = Color.White
                     )
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(
-                        if (isDarkTerrain) Color(0xF20F172A) else Color(0xFAF8FAFC)
-                    )
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Y2KTokens.CyberChromeDark.copy(alpha = 0.96f))
                     .border(
-                        BorderStroke(
-                            1.25.dp,
-                            if (isDarkTerrain) LiquidGlassTokens.DarkRefractionBorder else LiquidGlassTokens.LightRefractionBorder
-                        ),
-                        RoundedCornerShape(24.dp)
+                        BorderStroke(1.5.dp, Y2KTokens.ChromeBorderBrush),
+                        RoundedCornerShape(20.dp)
                     )
             ) {
                 LazyColumn(
@@ -337,13 +292,13 @@ fun GoogleMapsTopBar(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(if (isDarkTerrain) Color(0x3038BDF8) else Color(0x1F0284C7)),
+                                    .background(Y2KTokens.HolographicGelBrush),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = iconTint,
+                                    tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -353,22 +308,26 @@ fun GoogleMapsTopBar(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = place.name,
-                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily.SansSerif,
                                     fontWeight = FontWeight.Bold,
-                                    color = textColor,
+                                    fontSize = 14.sp,
+                                    color = Y2KTokens.TextPureWhite,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 if (place.address.isNotBlank()) {
                                     Text(
                                         text = place.address,
-                                        fontSize = 12.sp,
-                                        color = textSecondaryColor,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 11.sp,
+                                        color = Y2KTokens.TextMutedSteel,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
+
+                            Y2KTelemetryTag(text = "TARGET", tagColor = Y2KTokens.TextCyanGlow)
                         }
                     }
                 }

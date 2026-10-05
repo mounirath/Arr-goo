@@ -29,19 +29,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.AppLanguage
 import com.example.model.MapStyle
-import com.example.ui.theme.FrutigerAquaDeep
-import com.example.ui.theme.FrutigerDeepNavy
-import com.example.ui.theme.FrutigerGrassGreen
-import com.example.ui.theme.FrutigerSkyBlue
-import com.example.ui.theme.LiquidGlassButton
-import com.example.ui.theme.LiquidGlassTokens
+import com.example.ui.theme.Y2KGelButton
+import com.example.ui.theme.Y2KTokens
 
 @Composable
 fun MapFloatingControls(
@@ -50,27 +47,22 @@ fun MapFloatingControls(
     onToggleFullscreen: () -> Unit,
     currentMapStyle: MapStyle,
     onMapStyleChange: (MapStyle) -> Unit,
-    isNativeMap: Boolean = false,
-    onToggleMapEngine: (Boolean) -> Unit = {},
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
     currentLanguage: AppLanguage,
     modifier: Modifier = Modifier
 ) {
     var isLayersMenuOpen by remember { mutableStateOf(false) }
-    val isDarkTerrain = currentMapStyle == MapStyle.SATELLITE || currentMapStyle == MapStyle.DARK
-
-    val defaultIconTint = if (isDarkTerrain) LiquidGlassTokens.DarkTextPrimary else LiquidGlassTokens.LightTextPrimary
 
     Column(
         modifier = modifier.padding(horizontal = 14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Center on GPS Location Liquid Glass Capsule Button
-        LiquidGlassButton(
+        // 1. Center on GPS Location - Electric Blue Gel Button
+        Y2KGelButton(
             onClick = onCenterLocation,
-            isDarkTerrain = isDarkTerrain,
+            brush = Y2KTokens.ElectricBlueGelBrush,
             modifier = Modifier
                 .size(48.dp)
                 .testTag("btn_center_location"),
@@ -79,15 +71,15 @@ fun MapFloatingControls(
             Icon(
                 imageVector = Icons.Default.MyLocation,
                 contentDescription = "Center on my location",
-                tint = if (isDarkTerrain) Color(0xFF38BDF8) else FrutigerAquaDeep,
+                tint = Color.White,
                 modifier = Modifier.size(22.dp)
             )
         }
 
-        // 2. Fullscreen / Focus Mode Liquid Glass Capsule Button
-        LiquidGlassButton(
+        // 2. Fullscreen / Focus Mode - Liquid Chrome Mirror Button
+        Y2KGelButton(
             onClick = onToggleFullscreen,
-            isDarkTerrain = isDarkTerrain,
+            brush = Y2KTokens.LiquidChromeBrush,
             modifier = Modifier
                 .size(48.dp)
                 .testTag("btn_toggle_fullscreen"),
@@ -96,16 +88,16 @@ fun MapFloatingControls(
             Icon(
                 imageVector = if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
                 contentDescription = "Toggle full map view",
-                tint = defaultIconTint,
+                tint = Y2KTokens.CyberChromeDark,
                 modifier = Modifier.size(22.dp)
             )
         }
 
-        // 3. Layers / Map Style Liquid Glass Capsule Button
+        // 3. Layers / Map Style - Holographic Cyan-Magenta Gel Button
         Box {
-            LiquidGlassButton(
+            Y2KGelButton(
                 onClick = { isLayersMenuOpen = true },
-                isDarkTerrain = isDarkTerrain,
+                brush = Y2KTokens.HolographicGelBrush,
                 modifier = Modifier
                     .size(48.dp)
                     .testTag("btn_map_layers"),
@@ -114,7 +106,7 @@ fun MapFloatingControls(
                 Icon(
                     imageVector = Icons.Default.Layers,
                     contentDescription = "Map Style Layers",
-                    tint = if (isDarkTerrain) Color(0xFF4ADE80) else FrutigerGrassGreen,
+                    tint = Color.White,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -123,12 +115,9 @@ fun MapFloatingControls(
                 expanded = isLayersMenuOpen,
                 onDismissRequest = { isLayersMenuOpen = false },
                 modifier = Modifier
-                    .background(if (isDarkTerrain) Color(0xF20F172A) else Color(0xFAF8FAFC))
+                    .background(Y2KTokens.CyberChromeDark.copy(alpha = 0.96f))
                     .border(
-                        BorderStroke(
-                            1.25.dp,
-                            if (isDarkTerrain) LiquidGlassTokens.DarkRefractionBorder else LiquidGlassTokens.LightRefractionBorder
-                        ),
+                        BorderStroke(1.5.dp, Y2KTokens.ChromeBorderBrush),
                         RoundedCornerShape(16.dp)
                     )
             ) {
@@ -137,7 +126,11 @@ fun MapFloatingControls(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (style == currentMapStyle) {
-                                    Text("✓ ", color = FrutigerAquaDeep, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        text = "▶ ",
+                                        color = Y2KTokens.TextCyanGlow,
+                                        fontWeight = FontWeight.Black
+                                    )
                                 }
                                 Text(
                                     text = when (currentLanguage) {
@@ -145,9 +138,11 @@ fun MapFloatingControls(
                                         AppLanguage.EN -> style.labelEn
                                         AppLanguage.FR -> style.labelFr
                                     },
-                                    color = if (style == currentMapStyle) FrutigerAquaDeep else defaultIconTint,
-                                    fontWeight = if (style == currentMapStyle) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 14.sp
+                                    fontFamily = FontFamily.SansSerif,
+                                    fontStyle = FontStyle.Italic,
+                                    color = if (style == currentMapStyle) Y2KTokens.TextCyanGlow else Y2KTokens.TextSilver,
+                                    fontWeight = if (style == currentMapStyle) FontWeight.Black else FontWeight.SemiBold,
+                                    fontSize = 13.sp
                                 )
                             }
                         },
@@ -157,53 +152,13 @@ fun MapFloatingControls(
                         }
                     )
                 }
-
-                DropdownMenuItem(
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isNativeMap) {
-                                Text("✓ ", color = FrutigerAquaDeep, fontWeight = FontWeight.Bold)
-                            }
-                            Text(
-                                text = "🌐 Google Maps Web",
-                                color = if (!isNativeMap) FrutigerAquaDeep else defaultIconTint,
-                                fontWeight = if (!isNativeMap) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = 13.sp
-                            )
-                        }
-                    },
-                    onClick = {
-                        onToggleMapEngine(false)
-                        isLayersMenuOpen = false
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (isNativeMap) {
-                                Text("✓ ", color = FrutigerAquaDeep, fontWeight = FontWeight.Bold)
-                            }
-                            Text(
-                                text = "⚡ Google Maps SDK Natif",
-                                color = if (isNativeMap) FrutigerAquaDeep else defaultIconTint,
-                                fontWeight = if (isNativeMap) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = 13.sp
-                            )
-                        }
-                    },
-                    onClick = {
-                        onToggleMapEngine(true)
-                        isLayersMenuOpen = false
-                    }
-                )
             }
         }
 
-        // 4. Zoom In Liquid Glass Button (+)
-        LiquidGlassButton(
+        // 4. Zoom In - Liquid Chrome Mirror Button (+)
+        Y2KGelButton(
             onClick = onZoomIn,
-            isDarkTerrain = isDarkTerrain,
+            brush = Y2KTokens.LiquidChromeBrush,
             modifier = Modifier
                 .size(48.dp)
                 .testTag("btn_zoom_in"),
@@ -212,15 +167,15 @@ fun MapFloatingControls(
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "Zoom in",
-                tint = defaultIconTint,
+                tint = Y2KTokens.CyberChromeDark,
                 modifier = Modifier.size(22.dp)
             )
         }
 
-        // 5. Zoom Out Liquid Glass Button (-)
-        LiquidGlassButton(
+        // 5. Zoom Out - Liquid Chrome Mirror Button (-)
+        Y2KGelButton(
             onClick = onZoomOut,
-            isDarkTerrain = isDarkTerrain,
+            brush = Y2KTokens.LiquidChromeBrush,
             modifier = Modifier
                 .size(48.dp)
                 .testTag("btn_zoom_out"),
@@ -229,7 +184,7 @@ fun MapFloatingControls(
             Icon(
                 imageVector = Icons.Default.Remove,
                 contentDescription = "Zoom out",
-                tint = defaultIconTint,
+                tint = Y2KTokens.CyberChromeDark,
                 modifier = Modifier.size(22.dp)
             )
         }

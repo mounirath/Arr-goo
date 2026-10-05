@@ -24,9 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +34,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,14 +43,11 @@ import androidx.compose.ui.unit.sp
 import com.example.model.AppLanguage
 import com.example.model.TripState
 import com.example.model.UserLocation
-import com.example.ui.theme.FrutigerAquaDeep
-import com.example.ui.theme.FrutigerDeepNavy
-import com.example.ui.theme.FrutigerGrassGreen
-import com.example.ui.theme.FrutigerMeadowDark
-import com.example.ui.theme.FrutigerSkyBlue
-import com.example.ui.theme.FrutigerSlate
-import com.example.ui.theme.LiquidGlassCapsule
-import com.example.ui.theme.LiquidGlassTokens
+import com.example.ui.theme.Y2KChromeSurface
+import com.example.ui.theme.Y2KGelButton
+import com.example.ui.theme.Y2KTechnoText
+import com.example.ui.theme.Y2KTelemetryTag
+import com.example.ui.theme.Y2KTokens
 
 @Composable
 fun TripHud(
@@ -61,22 +58,18 @@ fun TripHud(
     isDarkTerrain: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val textColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextPrimary else LiquidGlassTokens.LightTextPrimary
-    val textSecondaryColor = if (isDarkTerrain) LiquidGlassTokens.DarkTextSecondary else LiquidGlassTokens.LightTextSecondary
-
     AnimatedVisibility(
         visible = tripState.isActive,
         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
         modifier = modifier
     ) {
-        // Floating Liquid Glass HUD Capsule
-        LiquidGlassCapsule(
+        // Y2K Liquid-Chrome Cyber HUD Capsule
+        Y2KChromeSurface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 14.dp, vertical = 6.dp),
-            isDarkTerrain = isDarkTerrain,
-            shape = RoundedCornerShape(26.dp),
+            shape = RoundedCornerShape(22.dp),
             elevation = 16.dp
         ) {
             Column(
@@ -94,62 +87,59 @@ fun TripHud(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        // Pulsing Live Indicator
+                        // Pulsing Live Cyber Beacon
                         Box(
                             modifier = Modifier
-                                .size(12.dp)
-                                .shadow(4.dp, CircleShape)
+                                .size(10.dp)
+                                .shadow(6.dp, CircleShape, spotColor = Y2KTokens.TextCyanGlow)
                                 .clip(CircleShape)
-                                .background(if (tripState.isWithinAlertZone) Color(0xFFF43F5E) else FrutigerGrassGreen)
-                                .border(BorderStroke(1.5.dp, Color.White), CircleShape)
+                                .background(if (tripState.isWithinAlertZone) Color(0xFFF43F5E) else Y2KTokens.TextCyanGlow)
+                                .border(BorderStroke(1.dp, Color.White), CircleShape)
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(
                                 text = if (tripState.isWithinAlertZone) {
                                     when (currentLanguage) {
                                         AppLanguage.AR -> "🚨 في منطقة التنبيه!"
-                                        AppLanguage.EN -> "🚨 Inside alert zone!"
-                                        AppLanguage.FR -> "🚨 Dans la zone d'alerte !"
+                                        AppLanguage.EN -> "// ALERT ZONE BREACHED //"
+                                        AppLanguage.FR -> "// ZONE D'ALERTE ATTEINTE //"
                                     }
                                 } else {
                                     when (currentLanguage) {
                                         AppLanguage.AR -> "رحلة جارية نحو:"
-                                        AppLanguage.EN -> "En route to:"
-                                        AppLanguage.FR -> "En route vers :"
+                                        AppLanguage.EN -> "// TRACKING VECTOR //"
+                                        AppLanguage.FR -> "// CAP EN COURS //"
                                     }
                                 },
-                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (tripState.isWithinAlertZone) Color(0xFFE11D48) else FrutigerMeadowDark
+                                color = if (tripState.isWithinAlertZone) Color(0xFFF43F5E) else Y2KTokens.TextCyanGlow
                             )
-                            Text(
+                            Y2KTechnoText(
                                 text = tripState.destination?.name ?: "",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = textColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                fontSize = 15.sp,
+                                letterSpacing = 1.sp,
+                                color = Y2KTokens.TextPureWhite
                             )
                         }
                     }
 
-                    // Stop trip Capsule Button
-                    IconButton(
+                    // Stop trip Holographic Gel Button
+                    Y2KGelButton(
                         onClick = onStopTrip,
+                        brush = Y2KTokens.HolographicGelBrush,
                         modifier = Modifier
                             .size(36.dp)
-                            .shadow(4.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(Color(0xFFFEE2E2))
-                            .border(BorderStroke(1.dp, Color(0xFFFCA5A5)), CircleShape)
-                            .testTag("hud_stop_trip_button")
+                            .testTag("hud_stop_trip_button"),
+                        contentDescription = "Arrêter le trajet"
                     ) {
                         Icon(
                             imageVector = Icons.Default.Stop,
                             contentDescription = "Arrêter le trajet",
-                            tint = Color(0xFFE11D48),
-                            modifier = Modifier.size(20.dp)
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -167,47 +157,49 @@ fun TripHud(
                         Text(
                             text = when (currentLanguage) {
                                 AppLanguage.AR -> "المسافة المتبقية"
-                                AppLanguage.EN -> "Distance left"
-                                AppLanguage.FR -> "Distance restante"
+                                AppLanguage.EN -> "DIST_REMAINING"
+                                AppLanguage.FR -> "DISTANCE_RESTANTE"
                             },
-                            fontSize = 11.sp,
-                            color = textSecondaryColor,
-                            fontWeight = FontWeight.Medium
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            color = Y2KTokens.TextMutedSteel,
+                            fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = if (tripState.currentDistanceMeters < Float.MAX_VALUE) {
                                 formatDistance(tripState.currentDistanceMeters)
                             } else "--",
+                            fontFamily = FontFamily.SansSerif,
+                            fontStyle = FontStyle.Italic,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
-                            color = if (isDarkTerrain) Color(0xFF38BDF8) else FrutigerMeadowDark
+                            letterSpacing = 1.sp,
+                            color = Y2KTokens.TextCyanGlow
                         )
                     }
 
                     // Speed Pill
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(if (isDarkTerrain) Color(0x301E293B) else Color.White.copy(alpha = 0.8f))
-                            .border(
-                                BorderStroke(1.dp, if (isDarkTerrain) Color(0x5038BDF8) else Color(0xFFBAE6FD)),
-                                CircleShape
-                            )
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Y2KTokens.ObsidianVoid)
+                            .border(BorderStroke(1.dp, Y2KTokens.ChromeBorderBrush), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Speed,
                                 contentDescription = null,
-                                tint = FrutigerAquaDeep,
+                                tint = Y2KTokens.TextCyanGlow,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "${userLocation.speedKmh.toInt()} km/h",
-                                fontSize = 12.sp,
+                                text = "${userLocation.speedKmh.toInt()} KM/H",
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = textColor
+                                color = Y2KTokens.TextSilver
                             )
                         }
                     }
@@ -215,27 +207,25 @@ fun TripHud(
                     // Alert Radius Pill
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(if (isDarkTerrain) Color(0x301E293B) else Color.White.copy(alpha = 0.8f))
-                            .border(
-                                BorderStroke(1.dp, if (isDarkTerrain) Color(0x5038BDF8) else Color(0xFFBAE6FD)),
-                                CircleShape
-                            )
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Y2KTokens.ObsidianVoid)
+                            .border(BorderStroke(1.dp, Y2KTokens.ChromeBorderBrush), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Alarm,
                                 contentDescription = null,
-                                tint = FrutigerSkyBlue,
+                                tint = Color(0xFFD946EF),
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "${tripState.alertRadiusMeters} m",
-                                fontSize = 12.sp,
+                                text = "${tripState.alertRadiusMeters} M",
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = textColor
+                                color = Y2KTokens.TextSilver
                             )
                         }
                     }
@@ -253,10 +243,10 @@ fun TripHud(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(6.dp)
+                        .height(5.dp)
                         .clip(CircleShape),
-                    color = if (tripState.isWithinAlertZone) Color(0xFFF43F5E) else FrutigerAquaDeep,
-                    trackColor = if (isDarkTerrain) Color(0x40334155) else Color(0x300284C7)
+                    color = if (tripState.isWithinAlertZone) Color(0xFFF43F5E) else Y2KTokens.TextCyanGlow,
+                    trackColor = Y2KTokens.ObsidianVoid
                 )
             }
         }
