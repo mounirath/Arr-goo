@@ -167,12 +167,27 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
             val hasValidMapsKey = BuildConfig.MAPS_API_KEY.isNotBlank() &&
                 !BuildConfig.MAPS_API_KEY.contains("YOUR_GOOGLE_MAPS_API_KEY")
 
+            val onSelectFavoriteStop: (com.example.data.FavoritePlace) -> Unit = { fav ->
+                viewModel.setDestination(
+                    LocationPoint(
+                        name = fav.name,
+                        address = fav.address,
+                        latitude = fav.latitude,
+                        longitude = fav.longitude
+                    )
+                )
+                viewModel.setAlertRadius(fav.defaultRadiusMeters)
+                centerDestTrigger++
+            }
+
             if (hasValidMapsKey) {
                 GoogleMapsComposeView(
                     userLocation = userLocation,
                     destination = destination,
                     alertRadiusMeters = alertRadius,
                     mapStyle = mapStyle,
+                    favorites = favorites,
+                    onSelectFavorite = onSelectFavoriteStop,
                     onMapClick = { lat, lng ->
                         viewModel.setMapClickedPoint(lat, lng)
                     },
@@ -187,6 +202,8 @@ fun ArrivaAppScreen(viewModel: MainViewModel) {
                     destination = destination,
                     alertRadiusMeters = alertRadius,
                     mapStyle = mapStyle,
+                    favorites = favorites,
+                    onSelectFavorite = onSelectFavoriteStop,
                     onMapClick = { lat, lng ->
                         viewModel.setMapClickedPoint(lat, lng)
                     },

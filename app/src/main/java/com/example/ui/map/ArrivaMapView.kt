@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.data.FavoritePlace
 import com.example.model.LocationPoint
 import com.example.model.MapStyle
 import com.example.model.UserLocation
@@ -25,6 +26,7 @@ import com.example.model.UserLocation
 interface MapBridgeListener {
     fun onMapClicked(lat: Double, lng: Double)
     fun onMapReady()
+    fun onFavoriteSelected(id: Long)
 }
 
 class MapJsBridge(private val listener: MapBridgeListener) {
@@ -37,6 +39,11 @@ class MapJsBridge(private val listener: MapBridgeListener) {
     fun onMapLoaded() {
         listener.onMapReady()
     }
+
+    @JavascriptInterface
+    fun onFavoriteSelected(id: Long) {
+        listener.onFavoriteSelected(id)
+    }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -46,6 +53,8 @@ fun ArrivaMapView(
     destination: LocationPoint?,
     alertRadiusMeters: Int,
     mapStyle: MapStyle,
+    favorites: List<FavoritePlace> = emptyList(),
+    onSelectFavorite: (FavoritePlace) -> Unit = {},
     onMapClick: (Double, Double) -> Unit,
     centerUserTrigger: Long = 0L,
     centerDestTrigger: Long = 0L,
@@ -54,12 +63,18 @@ fun ArrivaMapView(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val bridgeListener = remember {
+    val bridgeListener = remember(favorites) {
         object : MapBridgeListener {
             override fun onMapClicked(lat: Double, lng: Double) {
                 onMapClick(lat, lng)
             }
             override fun onMapReady() {}
+            override fun onFavoriteSelected(id: Long) {
+                val found = favorites.find { it.id == id }
+                if (found != null) {
+                    onSelectFavorite(found)
+                }
+            }
         }
     }
 
@@ -67,7 +82,6 @@ fun ArrivaMapView(
         WebView(context).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            settings.databaseEnabled = true
             settings.allowFileAccess = true
             settings.allowContentAccess = true
             settings.cacheMode = WebSettings.LOAD_DEFAULT
@@ -102,6 +116,15 @@ fun ArrivaMapView(
     // Update User Location Marker in Map
     LaunchedEffect(userLocation.latitude, userLocation.longitude, userLocation.accuracyMeters) {
         val script = "if (window.updateUser) { window.updateUser(${userLocation.latitude}, ${userLocation.longitude}, ${userLocation.accuracyMeters}); }"
+        webView.evaluateJavascript(script, null)
+    }
+
+    // Update Saved Favorite Stops in Map
+    LaunchedEffect(favorites) {
+        val favJsonArray = favorites.joinToString(separator = ",", prefix = "[", postfix = "]") { fav ->
+            """{"id":${fav.id},"name":"${fav.name.replace("\"", "\\\"")}","address":"${fav.address.replace("\"", "\\\"")}","lat":${fav.latitude},"lng":${fav.longitude},"tag":"${fav.tag.replace("\"", "\\\"")}","radius":${fav.defaultRadiusMeters}}"""
+        }
+        val script = "if (window.updateFavorites) { window.updateFavorites($favJsonArray); }"
         webView.evaluateJavascript(script, null)
     }
 
@@ -167,7 +190,6 @@ private fun generateMapHtml(initialStyle: String): String {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <!-- High Reliability Cloudflare Leaflet CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
@@ -238,19 +260,116 @@ private fun generateMapHtml(initialStyle: String): String {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-7px); }
         }
+
+        /* Frutiger Aero Interactive Favorite Stop Pin */
+        .fav-pin-pulse {
+            position: relative;
+            width: 38px;
+            height: 46px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            filter: drop-shadow(0 6px 12px rgba(245, 158, 11, 0.45));
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .fav-pin-pulse:hover, .fav-pin-pulse:active {
+            transform: scale(1.18) translateY(-4px);
+        }
+        .fav-pin-star-bubble {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 60%, #D97706 100%);
+            border: 2px solid #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        .fav-pin-stem {
+            width: 4px;
+            height: 10px;
+            background: #D97706;
+            border-radius: 2px;
+            margin-top: -2px;
+        }
+
+        /* Frutiger Aero Custom Leaflet Callout Popup */
+        .leaflet-popup-content-wrapper {
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(12px) !important;
+            border-radius: 20px !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 16px 32px rgba(2, 132, 199, 0.3), 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        .leaflet-popup-content {
+            margin: 14px 16px !important;
+            line-height: 1.4 !important;
+        }
+        .fav-callout-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .fav-callout-tag {
+            background: #FEF3C7;
+            color: #92400E;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            border: 1px solid #FCD34D;
+        }
+        .fav-callout-name {
+            color: #0A2540;
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+        .fav-callout-addr {
+            color: #475569;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+        .fav-callout-radius {
+            color: #15803D;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .fav-callout-btn {
+            width: 100%;
+            padding: 8px 12px;
+            background: linear-gradient(180deg, #38BDF8 0%, #0284C7 60%, #10B981 100%);
+            border: 1px solid #FFFFFF;
+            border-radius: 12px;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35);
+            cursor: pointer;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
         var map = L.map('map', {
-            center: [36.7538, 3.0588], // Default Algiers / City view
+            center: [36.7538, 3.0588],
             zoom: 14,
             zoomControl: false,
             attributionControl: false
         });
 
-        // Google Maps & Fallback High-Quality Tiles
+        // Google Maps & Fallback Tiles
         var tileLayers = {
             google: L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
                 maxZoom: 20,
@@ -277,7 +396,6 @@ private fun generateMapHtml(initialStyle: String): String {
         var currentLayer = tileLayers[currentStyleKey] || tileLayers.google;
         currentLayer.addTo(map);
 
-        // Fallback to OSM if Google tile loading has any network issues
         var fallbackOsm = tileLayers.osm;
         tileLayers.google.on('tileerror', function() {
             if (!map.hasLayer(fallbackOsm)) {
@@ -311,7 +429,7 @@ private fun generateMapHtml(initialStyle: String): String {
             updateRoute();
         };
 
-        // Destination Marker (Google Maps Red Pin SVG)
+        // Destination Marker
         var destPinSvg = '<svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
             '<path d="M20 0C8.954 0 0 8.954 0 20C0 35 20 48 20 48C20 48 40 35 40 20C40 8.954 31.046 0 20 0Z" fill="#EA4335"/>' +
             '<circle cx="20" cy="18" r="8" fill="white"/>' +
@@ -358,6 +476,45 @@ private fun generateMapHtml(initialStyle: String): String {
             if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
             if (geofenceCircle) { map.removeLayer(geofenceCircle); geofenceCircle = null; }
             if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+        };
+
+        // Saved Favorite Stops Layer & Interactive Callout
+        var favoritesLayer = L.layerGroup().addTo(map);
+
+        window.updateFavorites = function(favoritesList) {
+            favoritesLayer.clearLayers();
+            if (!favoritesList || !favoritesList.length) return;
+
+            favoritesList.forEach(function(fav) {
+                var favIcon = L.divIcon({
+                    className: 'fav-marker-leaflet',
+                    html: '<div class="fav-pin-pulse"><div class="fav-pin-star-bubble">★</div><div class="fav-pin-stem"></div></div>',
+                    iconSize: [38, 46],
+                    iconAnchor: [19, 44],
+                    popupAnchor: [0, -44]
+                });
+
+                var marker = L.marker([fav.lat, fav.lng], { icon: favIcon });
+
+                var popupHtml = '<div class="fav-callout-container">' +
+                    '<div class="fav-callout-header">' +
+                        '<span class="fav-callout-tag">★ ' + (fav.tag || 'Favori') + '</span>' +
+                    '</div>' +
+                    '<div class="fav-callout-name">' + fav.name + '</div>' +
+                    (fav.address ? '<div class="fav-callout-addr">' + fav.address + '</div>' : '') +
+                    '<div class="fav-callout-radius">🔔 Réveil à ' + fav.radius + ' m</div>' +
+                    '<button class="fav-callout-btn" onclick="window.Android.onFavoriteSelected(' + fav.id + ')">' +
+                        '🎯 Définir comme destination' +
+                    '</button>' +
+                '</div>';
+
+                marker.bindPopup(popupHtml, {
+                    maxWidth: 240,
+                    className: 'frutiger-aero-popup'
+                });
+
+                favoritesLayer.addLayer(marker);
+            });
         };
 
         function updateRoute() {
@@ -409,7 +566,6 @@ private fun generateMapHtml(initialStyle: String): String {
             map.zoomOut();
         };
 
-        // Force resize so tiles calculate viewport correctly
         function triggerResize() {
             if (map) {
                 map.invalidateSize();
@@ -420,14 +576,12 @@ private fun generateMapHtml(initialStyle: String): String {
         setTimeout(triggerResize, 400);
         setTimeout(triggerResize, 1200);
 
-        // Tap on map to set destination
         map.on('click', function(e) {
             if (window.Android && window.Android.onMapClicked) {
                 window.Android.onMapClicked(e.latlng.lat, e.latlng.lng);
             }
         });
 
-        // Map ready callback
         setTimeout(function() {
             if (window.Android && window.Android.onMapLoaded) {
                 window.Android.onMapLoaded();
